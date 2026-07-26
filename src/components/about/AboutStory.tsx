@@ -5,29 +5,29 @@ type Props = {
 
 export function AboutStory({ story, now }: Props) {
   return (
-    <section
-      className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
-      aria-label="关于我与当前在做"
-    >
-      <div className="about-panel animate-fade-up space-y-3">
-        <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight">关于我</h2>
-        <div className="space-y-3 text-[var(--color-text-muted)] leading-relaxed">
+    <section className="about-story" aria-label="关于我与当前在做">
+      <div className="about-panel about-panel--story animate-fade-up">
+        <div className="about-section-head">
+          <span className="about-section-head__index">01</span>
+          <h2 className="about-section-head__title">关于我</h2>
+        </div>
+        <div className="about-story__prose">
           {story.map((paragraph) => (
             <p key={paragraph.slice(0, 24)}>{paragraph}</p>
           ))}
         </div>
       </div>
 
-      <div className="about-panel animate-fade-up space-y-3">
-        <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight">{now.title}</h2>
-        <ul className="space-y-2.5">
-          {now.items.map((item) => (
-            <li key={item} className="flex gap-2 text-sm text-[var(--color-text-muted)]">
-              <span
-                className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--color-accent)] shadow-[0_0_10px_var(--color-glow)]"
-                aria-hidden
-              />
-              <span>{item}</span>
+      <div className="about-panel about-panel--now animate-fade-up">
+        <div className="about-section-head">
+          <span className="about-section-head__index">02</span>
+          <h2 className="about-section-head__title">{now.title}</h2>
+        </div>
+        <ul className="about-now-list">
+          {now.items.map((item, i) => (
+            <li key={item} className="about-now-item" style={{ ['--now-i' as string]: i }}>
+              <span className="about-now-item__bar" aria-hidden />
+              <span className="about-now-item__text">{item}</span>
             </li>
           ))}
         </ul>

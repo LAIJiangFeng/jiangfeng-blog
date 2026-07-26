@@ -4,20 +4,24 @@ type Props = { groups: AboutSkillGroup[] }
 
 export function AboutSkills({ groups }: Props) {
   return (
-    <section className="about-panel animate-fade-up space-y-5" aria-label="技能">
-      <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight">技能</h2>
-      <div className="space-y-4">
-        {groups.map((group) => (
-          <div key={group.group} className="space-y-2">
-            <h3 className="text-xs font-medium tracking-wider text-[var(--color-text-muted)] uppercase">
-              {group.group}
-            </h3>
-            <ul className="flex flex-wrap gap-2">
+    <section className="about-panel about-panel--skills animate-fade-up" aria-label="技能">
+      <div className="about-section-head">
+        <span className="about-section-head__index">04</span>
+        <h2 className="about-section-head__title">技能</h2>
+      </div>
+
+      <div className="about-skills-grid">
+        {groups.map((group, gi) => (
+          <div
+            key={group.group}
+            className="about-skill-card"
+            style={{ ['--skill-i' as string]: gi }}
+          >
+            <div className="about-skill-card__shine" aria-hidden />
+            <h3 className="about-skill-card__group">{group.group}</h3>
+            <ul className="about-skill-card__items">
               {group.items.map((item) => (
-                <li
-                  key={item}
-                  className="chip-glow inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1 text-[12px] text-[var(--color-text)]"
-                >
+                <li key={item} className="about-skill-chip">
                   {item}
                 </li>
               ))}
