@@ -2,6 +2,11 @@ import type { AboutTimelineItem } from '@/data/about'
 
 type Props = { items: AboutTimelineItem[] }
 
+/**
+ * Classic vertical timeline:
+ *   [spine + node] | year + title + description
+ * Node vertically centers on the year line; spine runs through node centers.
+ */
 export function AboutTimeline({ items }: Props) {
   return (
     <section className="about-panel about-panel--timeline animate-fade-up" aria-label="经历">
@@ -10,35 +15,40 @@ export function AboutTimeline({ items }: Props) {
         <h2 className="about-section-head__title">经历</h2>
       </div>
 
-      <div className="about-timeline">
-        <div className="about-timeline__spine" aria-hidden />
-        <ol className="about-timeline__list">
-          {items.map((item, i) => (
-            <li
-              key={item.year}
-              className={[
-                'about-timeline__item',
-                item.current ? 'about-timeline__item--current' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              style={{ ['--tl-i' as string]: i }}
-            >
-              <span className="about-timeline__node" aria-hidden>
-                <span className="about-timeline__node-core" />
+      <ol className="about-tl">
+        {items.map((item, i) => (
+          <li
+            key={item.year}
+            className={[
+              'about-tl__item',
+              item.current ? 'about-tl__item--current' : '',
+              i === items.length - 1 ? 'about-tl__item--last' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{ ['--tl-i' as string]: i }}
+          >
+            {/* Marker column: continuous spine + centered node */}
+            <div className="about-tl__marker" aria-hidden>
+              <span className="about-tl__spine" />
+              <span className="about-tl__node">
+                <span className="about-tl__node-core" />
               </span>
-              <div className="about-timeline__year">{item.year}</div>
-              <div className="about-timeline__body">
-                <div className="about-timeline__title-row">
-                  <h3 className="about-timeline__title">{item.title}</h3>
-                  {item.current && <span className="about-timeline__now">现在</span>}
-                </div>
-                <p className="about-timeline__desc">{item.description}</p>
+            </div>
+
+            <div className="about-tl__content">
+              <div className="about-tl__meta">
+                <time className="about-tl__year" dateTime={item.year}>
+                  {item.year}
+                </time>
+                {item.current && <span className="about-tl__now">现在</span>}
               </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+              <h3 className="about-tl__title">{item.title}</h3>
+              <p className="about-tl__desc">{item.description}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
