@@ -5778,800 +5778,486 @@ html.light .friend-marquee__fade--right {
     transform: none;
   }
 }
-/* ---------- About page ---------- */
+
+/* ---------- About page (compact shell) ---------- */
 .about-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
   width: 100%;
-  max-width: 64rem;
+  max-width: 40rem;
   margin-inline: auto;
-  padding-inline: 1rem;
-  padding-bottom: 2.5rem;
+  padding: 0.5rem 1rem 2rem;
 }
 
-@media (min-width: 768px) {
-  .about-page {
-    gap: 2rem;
-  }
-}
-
-/* ---- Hero ---- */
-.about-hero {
+.about-shell {
   position: relative;
   overflow: hidden;
-  isolation: isolate;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
-  border-radius: 1.6rem;
-  padding: 2.1rem 1.35rem 2rem;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  border-radius: 1.35rem;
+  padding: 1.35rem 1.2rem 1.15rem;
   background:
-    radial-gradient(ellipse 80% 70% at 15% 0%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 55%),
     linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-elevated)) 0%,
-      var(--color-bg-elevated) 48%,
-      color-mix(in srgb, var(--color-bg) 70%, var(--color-bg-elevated)) 100%
+      165deg,
+      color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-elevated)) 0%,
+      var(--color-bg-elevated) 42%,
+      color-mix(in srgb, var(--color-bg) 40%, var(--color-bg-elevated)) 100%
     );
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent) inset,
-    0 24px 60px -36px color-mix(in srgb, var(--color-glow) 70%, transparent);
+  box-shadow: 0 18px 48px -36px color-mix(in srgb, var(--color-glow) 50%, transparent);
 }
 
-.about-hero__grid {
+.about-shell__glow {
   pointer-events: none;
   position: absolute;
-  inset: 0;
-  opacity: 0.35;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--color-accent) 12%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 12%, transparent) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 70% 80% at 50% 40%, #000 20%, transparent 75%);
-}
-
-.about-hero__glow {
-  pointer-events: none;
-  position: absolute;
+  width: 16rem;
+  height: 16rem;
+  top: -4rem;
+  right: -3rem;
   border-radius: 9999px;
-  filter: blur(2px);
-}
-
-.about-hero__glow--a {
-  width: min(22rem, 70vw);
-  height: min(22rem, 70vw);
-  top: -18%;
-  left: 8%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-glow) 80%, transparent), transparent 68%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-glow) 55%, transparent), transparent 70%);
   opacity: 0.55;
-  animation: about-float 9s ease-in-out infinite;
+  animation: about-breathe 5.5s ease-in-out infinite;
 }
 
-.about-hero__glow--b {
-  width: min(18rem, 55vw);
-  height: min(18rem, 55vw);
-  right: -6%;
-  bottom: -28%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 45%, transparent), transparent 70%);
-  opacity: 0.4;
-  animation: about-float 11s ease-in-out infinite reverse;
+.about-breath-surface {
+  animation: about-shell-breathe 6s ease-in-out infinite;
 }
 
-.about-hero__scan {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    color-mix(in srgb, var(--color-accent) 8%, transparent) 48%,
-    transparent 52%
-  );
-  background-size: 100% 220%;
-  animation: about-scan 7s linear infinite;
-  opacity: 0.5;
-  mix-blend-mode: screen;
-}
-
-.about-hero__inner {
+/* ---- Header (identity + story, no card stack) ---- */
+.about-top {
   position: relative;
   z-index: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  text-align: center;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
 }
 
-@media (min-width: 640px) {
-  .about-hero {
-    padding: 2.5rem 2.25rem 2.35rem;
-  }
-
-  .about-hero__inner {
-    flex-direction: row;
-    align-items: center;
-    gap: 2.25rem;
-    text-align: left;
-  }
-}
-
-.about-hero__avatar-wrap {
+.about-top__avatar {
   position: relative;
   flex-shrink: 0;
-}
-
-.about-hero__avatar-ring {
-  position: relative;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 9999px;
   display: grid;
   place-items: center;
-  width: 7rem;
-  height: 7rem;
-  border-radius: 9999px;
-  box-shadow:
-    0 0 36px -6px var(--color-glow),
-    0 0 0 1px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 
-/* Spinning accent ring only — avatar stays upright */
-.about-hero__avatar-ring::before {
-  content: '';
+.about-top__ring {
   position: absolute;
-  inset: 0;
+  inset: -3px;
   border-radius: inherit;
-  background:
-    conic-gradient(
-      from 200deg,
-      color-mix(in srgb, var(--color-accent) 85%, white),
-      transparent 35%,
-      color-mix(in srgb, var(--color-accent) 55%, transparent) 60%,
-      color-mix(in srgb, var(--color-accent) 90%, white)
-    );
-  animation: about-spin-slow 12s linear infinite;
-  z-index: 0;
+  border: 1.5px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  box-shadow: 0 0 18px -4px var(--color-glow);
+  animation: about-breathe 3.8s ease-in-out infinite;
 }
 
-.about-hero__avatar-ring::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  background: var(--color-bg-elevated);
-  z-index: 1;
-}
-
-.about-hero__avatar {
+.about-top__img,
+.about-top__initial {
   position: relative;
-  z-index: 2;
-  width: 6.15rem;
-  height: 6.15rem;
+  z-index: 1;
+  width: 3.75rem;
+  height: 3.75rem;
   border-radius: 9999px;
   object-fit: cover;
-  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg));
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
 }
 
-.about-hero__avatar--initials {
+.about-top__initial {
   display: grid;
   place-items: center;
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: 1.35rem;
   color: var(--color-accent);
-  text-shadow: 0 0 24px color-mix(in srgb, var(--color-glow) 70%, transparent);
 }
 
-.about-hero__live {
-  position: absolute;
-  left: 50%;
-  bottom: -0.55rem;
-  translate: -50% 0;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: 9999px;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
-  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  padding: 0.2rem 0.55rem;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  box-shadow: 0 8px 20px -12px var(--color-glow);
-}
-
-.about-hero__live-dot {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 9999px;
-  background: #34d399;
-  box-shadow: 0 0 10px #34d399;
-  animation: about-blink 1.6s ease-in-out infinite;
-}
-
-.about-hero__copy {
+.about-top__body {
   min-width: 0;
   flex: 1;
 }
 
-.about-hero__kicker {
-  margin: 0 0 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-accent) 85%, var(--color-text-muted));
-}
-
-.about-hero__name {
+.about-top__names {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.65rem;
+}
+
+.about-top__cn {
   margin: 0;
-}
-
-.about-hero__name-cn {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  line-height: 1.1;
+  font-size: 1.55rem;
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  background: linear-gradient(
-    120deg,
-    var(--color-text) 10%,
-    color-mix(in srgb, var(--color-accent) 75%, var(--color-text)) 48%,
-    var(--color-text) 90%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: about-shimmer-text 8s linear infinite;
 }
 
-.about-hero__name-en {
-  font-size: 0.95rem;
+.about-top__en {
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
-.about-hero__tagline {
-  margin: 0.85rem 0 0;
-  font-size: clamp(1rem, 2.2vw, 1.2rem);
-  color: color-mix(in srgb, var(--color-text) 92%, var(--color-accent));
-}
-
-.about-hero__badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 1.15rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 640px) {
-  .about-hero__badges {
-    justify-content: flex-start;
-  }
-}
-
-.about-hero__badge {
-  border-radius: 9999px;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
-  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
-  padding: 0.3rem 0.75rem;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: color-mix(in srgb, var(--color-accent) 90%, var(--color-text));
-  box-shadow: 0 0 18px -10px var(--color-glow);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.about-hero__badge:hover {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 22px -8px var(--color-glow);
-  transform: translateY(-1px);
-}
-
-/* ---- Shared panel / section head ---- */
-.about-panel {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
-  border-radius: 1.25rem;
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-elevated)) 0%,
-      color-mix(in srgb, var(--color-bg-elevated) 94%, transparent) 55%
-    );
-  backdrop-filter: blur(14px);
-  padding: 1.35rem 1.35rem 1.45rem;
-  box-shadow: 0 16px 48px -32px color-mix(in srgb, var(--color-glow) 55%, transparent);
-}
-
-.about-panel--now {
-  background:
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-elevated)) 0%,
-      var(--color-bg-elevated) 60%
-    );
-}
-
-.about-section-head {
-  display: flex;
-  align-items: baseline;
-  gap: 0.7rem;
-  margin-bottom: 1rem;
-}
-
-.about-section-head__index {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--color-accent);
-  text-shadow: 0 0 16px color-mix(in srgb, var(--color-glow) 60%, transparent);
-}
-
-.about-section-head__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  letter-spacing: -0.01em;
-}
-
-/* ---- Story + Now ---- */
-.about-story {
-  display: grid;
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .about-story {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: 1.1rem;
-  }
-}
-
-.about-story__prose {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-  color: var(--color-text-muted);
-  line-height: 1.75;
-  font-size: 0.98rem;
-}
-
-.about-story__prose p {
-  margin: 0;
-}
-
-.about-now-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.about-now-item {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  border-radius: 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
-  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
-  padding: 0.7rem 0.85rem;
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--now-i, 0) * 60ms);
-}
-
-.about-now-item:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-  box-shadow: 0 0 22px -12px var(--color-glow);
-  transform: translateX(2px);
-}
-
-.about-now-item__bar {
-  margin-top: 0.35rem;
-  width: 0.22rem;
-  height: 0.9rem;
-  flex-shrink: 0;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 20%, transparent));
-  box-shadow: 0 0 10px var(--color-glow);
-}
-
-.about-now-item__text {
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-}
-
-/* ---- Timeline (classic vertical: spine through node centers) ----
-   Layout per item:
-     [ marker col 20px ] [ content ]
-   Marker col holds a full-height spine segment + a node whose
-   vertical center aligns with the year line (first line of content).
-*/
-.about-tl {
-  --tl-marker: 1.25rem;
-  --tl-node: 0.875rem;
-  --tl-gap: 0.95rem;
-  --tl-year-lh: 1.35rem;
-
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.about-tl__item {
-  display: grid;
-  grid-template-columns: var(--tl-marker) minmax(0, 1fr);
-  column-gap: var(--tl-gap);
-  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--tl-i, 0) * 70ms);
-}
-
-/* Marker column: spine is the full cell height; node sits on year baseline */
-.about-tl__marker {
-  position: relative;
-  width: var(--tl-marker);
-  /* Match content top so node centers on year row */
-  min-height: 100%;
-}
-
-.about-tl__spine {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  translate: -50% 0;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-accent) 70%, transparent),
-    color-mix(in srgb, var(--color-accent) 25%, var(--color-border))
-  );
-}
-
-/* First item: spine starts at node center (not above) */
-.about-tl__item:first-child .about-tl__spine {
-  top: calc(var(--tl-year-lh) / 2);
-}
-
-/* Last item: spine ends at node center */
-.about-tl__item--last .about-tl__spine {
-  bottom: auto;
-  height: calc(var(--tl-year-lh) / 2);
-}
-
-.about-tl__node {
-  position: absolute;
-  left: 50%;
-  /* Center node on the year line (content first-line height / 2) */
-  top: calc(var(--tl-year-lh) / 2);
-  translate: -50% -50%;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: var(--tl-node);
-  height: var(--tl-node);
-  border-radius: 9999px;
-  border: 2px solid color-mix(in srgb, var(--color-accent) 75%, transparent);
-  background: var(--color-bg-elevated);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--color-bg-elevated) 92%, transparent),
-    0 0 12px color-mix(in srgb, var(--color-glow) 45%, transparent);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.about-tl__node-core {
-  width: 0.35rem;
-  height: 0.35rem;
-  border-radius: 9999px;
-  background: var(--color-accent);
-  box-shadow: 0 0 10px var(--color-glow);
-  transition: transform 0.2s ease;
-}
-
-.about-tl__item:hover .about-tl__node,
-.about-tl__item--current .about-tl__node {
-  border-color: var(--color-accent);
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--color-accent) 14%, transparent),
-    0 0 16px color-mix(in srgb, var(--color-glow) 55%, transparent);
-  transform: scale(1.08);
-}
-
-.about-tl__item:hover .about-tl__node-core,
-.about-tl__item--current .about-tl__node-core {
-  transform: scale(1.15);
-}
-
-.about-tl__content {
-  min-width: 0;
-  /* No top padding — year line stays at y=0 so node formula stays exact */
-  padding: 0 0 1.45rem;
-  border-radius: 0.85rem;
-}
-
-.about-tl__item--last .about-tl__content {
-  padding-bottom: 0.15rem;
-}
-
-/* Current: accent bar + soft fill, no extra top padding (keeps node aligned) */
-.about-tl__item--current .about-tl__content {
-  position: relative;
-  padding-left: 0.75rem;
-}
-
-.about-tl__item--current .about-tl__content::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.15rem;
-  bottom: 1.55rem;
-  width: 3px;
-  border-radius: 9999px;
-  background: linear-gradient(
-    180deg,
-    var(--color-accent),
-    color-mix(in srgb, var(--color-accent) 25%, transparent)
-  );
-  box-shadow: 0 0 12px color-mix(in srgb, var(--color-glow) 55%, transparent);
-}
-
-.about-tl__item--last.about-tl__item--current .about-tl__content::before {
-  bottom: 0.2rem;
-}
-
-.about-tl__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem;
-  /* Fixed line-height so node can align to year center */
-  min-height: var(--tl-year-lh);
-  line-height: var(--tl-year-lh);
-}
-
-.about-tl__year {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-accent);
-  line-height: var(--tl-year-lh);
-}
-
-.about-tl__now {
-  display: inline-flex;
-  align-items: center;
-  height: 1.15rem;
-  border-radius: 9999px;
-  border: 1px solid var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  padding: 0 0.5rem;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--color-accent);
-  box-shadow: 0 0 14px -6px var(--color-glow);
-}
-
-.about-tl__title {
-  margin: 0.2rem 0 0;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--color-text);
-}
-
-.about-tl__desc {
+.about-top__tag {
   margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--color-accent) 70%, var(--color-text));
+  font-weight: 500;
+}
+
+.about-top__story {
+  margin: 0.55rem 0 0;
   font-size: 0.88rem;
   line-height: 1.65;
   color: var(--color-text-muted);
 }
 
-.about-tl__item:hover .about-tl__title {
-  color: color-mix(in srgb, var(--color-accent) 35%, var(--color-text));
-}
-
-/* ---- Skills bento ---- */
-.about-skills-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .about-skills-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .about-skills-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .about-skill-card:first-child {
-    grid-column: span 1;
-  }
-}
-
-.about-skill-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
-  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
-  padding: 1rem 1rem 1.05rem;
-  transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
-  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--skill-i, 0) * 55ms);
-}
-
-.about-skill-card:hover {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
-  box-shadow: 0 12px 36px -22px var(--color-glow);
-  transform: translateY(-2px);
-}
-
-.about-skill-card__shine {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 30%,
-    color-mix(in srgb, var(--color-accent) 12%, transparent) 48%,
-    transparent 62%
-  );
-  transform: translateX(-120%);
-  transition: transform 0.55s ease;
-}
-
-.about-skill-card:hover .about-skill-card__shine {
-  transform: translateX(120%);
-}
-
-.about-skill-card__group {
-  position: relative;
-  margin: 0 0 0.7rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text-muted));
-}
-
-.about-skill-card__items {
-  position: relative;
+.about-top__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0;
+  gap: 0.35rem;
+  margin: 0.7rem 0 0;
   padding: 0;
   list-style: none;
 }
 
-.about-skill-chip {
+.about-top__badges li {
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  padding: 0.18rem 0.55rem;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+}
+
+/* ---- Focus carousel ---- */
+.about-focus {
+  position: relative;
+  z-index: 1;
+  padding: 0.95rem 0 0.85rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+}
+
+.about-focus__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.about-focus__pulse {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
+  animation: about-breathe 1.8s ease-in-out infinite;
+}
+
+.about-focus__stage {
+  position: relative;
+  min-height: 1.55rem;
+}
+
+.about-focus__line {
+  position: absolute;
+  inset: 0 auto auto 0;
+  margin: 0;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.about-focus__line.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  position: relative;
+}
+
+.about-focus__dots {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.about-focus__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.about-focus__dot.is-active {
+  width: 1.1rem;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-glow) 60%, transparent);
+}
+
+/* ---- Experience year switcher ---- */
+.about-exp {
+  position: relative;
+  z-index: 1;
+  padding: 0.95rem 0 0.85rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+}
+
+.about-exp__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.about-exp__kicker,
+.about-skills__kicker {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.about-exp__track {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  padding: 0.2rem;
+  overflow: hidden;
+}
+
+.about-exp__thumb {
+  position: absolute;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+  box-shadow: 0 0 16px -8px var(--color-glow);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-exp__year {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  padding: 0.4rem 0.2rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.about-exp__year.is-active {
+  color: var(--color-accent);
+}
+
+.about-exp__year.is-now:not(.is-active) {
+  color: color-mix(in srgb, var(--color-accent) 55%, var(--color-text-muted));
+}
+
+.about-exp__panel {
+  margin-top: 0.75rem;
+  min-height: 3.6rem;
+}
+
+.about-exp__panel-inner {
+  animation: about-swap-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.about-exp__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.about-exp__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.about-exp__badge {
+  border-radius: 9999px;
+  border: 1px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  padding: 0.08rem 0.45rem;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  animation: about-breathe 2.4s ease-in-out infinite;
+}
+
+.about-exp__desc {
+  margin: 0.3rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+/* ---- Skills marquee ---- */
+.about-skills {
+  position: relative;
+  z-index: 1;
+  padding-top: 0.9rem;
+}
+
+.about-skills__head {
+  margin-bottom: 0.5rem;
+}
+
+.about-skills__rail {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.about-skills__track {
+  display: flex;
+  width: max-content;
+  gap: 0.45rem;
+  animation: about-marquee 28s linear infinite;
+}
+
+.about-skills__rail:hover .about-skills__track {
+  animation-play-state: paused;
+}
+
+.about-skills__chip {
+  flex-shrink: 0;
   border-radius: 9999px;
   border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
-  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg));
-  padding: 0.28rem 0.65rem;
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--color-bg));
+  padding: 0.28rem 0.7rem;
   font-size: 12px;
   color: var(--color-text);
-  transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  white-space: nowrap;
 }
 
-.about-skill-chip:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  box-shadow: 0 0 16px -8px var(--color-glow);
+.about-skills__fade {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.5rem;
+  z-index: 1;
 }
 
-/* ---- Keyframes ---- */
-@keyframes about-float {
+.about-skills__fade--l {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-bg-elevated), transparent);
+}
+
+.about-skills__fade--r {
+  right: 0;
+  background: linear-gradient(270deg, var(--color-bg-elevated), transparent);
+}
+
+/* ---- Motion ---- */
+@keyframes about-breathe {
   0%,
   100% {
-    transform: translate3d(0, 0, 0);
+    opacity: 0.55;
+    transform: scale(1);
   }
   50% {
-    transform: translate3d(4%, 6%, 0);
-  }
-}
-
-@keyframes about-scan {
-  0% {
-    background-position: 0 -40%;
-  }
-  100% {
-    background-position: 0 140%;
-  }
-}
-
-@keyframes about-spin-slow {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes about-blink {
-  0%,
-  100% {
     opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes about-shell-breathe {
+  0%,
+  100% {
+    box-shadow: 0 18px 48px -36px color-mix(in srgb, var(--color-glow) 40%, transparent);
   }
   50% {
-    opacity: 0.35;
+    box-shadow:
+      0 20px 52px -32px color-mix(in srgb, var(--color-glow) 70%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
   }
 }
 
-@keyframes about-shimmer-text {
+@keyframes about-swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
   to {
-    background-position: 200% center;
+    opacity: 1;
+    transform: none;
   }
 }
 
-html.light .about-hero {
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent) inset,
-    0 20px 40px -28px rgba(11, 126, 164, 0.18);
+@keyframes about-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
-html.light .about-hero__scan {
-  mix-blend-mode: multiply;
-  opacity: 0.25;
+html.light .about-shell {
+  box-shadow: 0 14px 36px -28px rgba(15, 23, 42, 0.14);
 }
 
-html.light .about-hero__name-cn {
-  background: linear-gradient(
-    120deg,
-    var(--color-text) 15%,
-    color-mix(in srgb, var(--color-accent) 70%, var(--color-text)) 50%,
-    var(--color-text) 85%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
+html.light .about-skills__fade--l {
+  background: linear-gradient(90deg, var(--color-bg-elevated), transparent);
+}
+
+html.light .about-skills__fade--r {
+  background: linear-gradient(270deg, var(--color-bg-elevated), transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-hero__avatar-ring,
-  .about-hero__glow--a,
-  .about-hero__glow--b,
-  .about-hero__scan,
-  .about-hero__live-dot,
-  .about-hero__name-cn,
-  .about-now-item,
-  .about-tl__item,
-  .about-skill-card,
-  .about-skill-card__shine {
+  .about-shell__glow,
+  .about-breath-surface,
+  .about-top__ring,
+  .about-focus__pulse,
+  .about-exp__badge,
+  .about-skills__track,
+  .about-exp__panel-inner,
+  .about-exp__thumb,
+  .about-focus__line {
     animation: none !important;
     transition: none !important;
   }
 
-  .about-hero__badge:hover,
-  .about-now-item:hover,
-  .about-tl__item:hover .about-tl__node,
-  .about-tl__item--current .about-tl__node,
-  .about-tl__item:hover .about-tl__node-core,
-  .about-tl__item--current .about-tl__node-core,
-  .about-skill-card:hover {
-    transform: none !important;
+  .about-focus__line {
+    position: relative;
+    opacity: 1;
+    transform: none;
+  }
+
+  .about-focus__line:not(.is-active) {
+    display: none;
   }
 }
-

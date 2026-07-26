@@ -9,11 +9,13 @@ describe('about content', () => {
     expect(content.timeline.at(-1)?.current).toBe(true)
   })
 
-  it('includes story transition from 2018 and non-specific gov wording in now', () => {
+  it('keeps story compact and has focus + skill tags', () => {
     const content = getAboutContent()
     expect(content.story.join('')).toMatch(/2018/)
+    expect(content.story.join('').length).toBeLessThan(120)
+    expect(content.now.items.length).toBeGreaterThanOrEqual(3)
     expect(content.now.items.some((item) => item.includes('政企数字化'))).toBe(true)
-    expect(content.skills.length).toBeGreaterThanOrEqual(4)
+    expect(content.skillTags.length).toBeGreaterThanOrEqual(6)
     expect(content.badges.length).toBeGreaterThanOrEqual(2)
   })
 })
