@@ -695,18 +695,41 @@ body {
 html.home-route {
   /* site-header: py-3.5 + ~h-9 controls ≈ 3.75–4rem */
   --home-header-h: 4rem;
-  --home-orb-h: min(68vh, 620px);
+  /*
+    Use svh (small viewport) so iOS URL-bar show/hide does not resize the hero
+    band mid-scroll — classic vh jumps caused the frosted sheet to “pop”.
+  */
+  --home-orb-h: min(68svh, 620px);
 }
 
 @media (min-width: 640px) {
   html.home-route {
-    --home-orb-h: min(70vh, 640px);
+    --home-orb-h: min(70svh, 640px);
   }
 }
 
 @media (min-width: 768px) {
   html.home-route {
-    --home-orb-h: min(72vh, 660px);
+    --home-orb-h: min(72svh, 660px);
+  }
+}
+
+/* Fallback when svh is unsupported */
+@supports not (height: 1svh) {
+  html.home-route {
+    --home-orb-h: min(68vh, 620px);
+  }
+
+  @media (min-width: 640px) {
+    html.home-route {
+      --home-orb-h: min(70vh, 640px);
+    }
+  }
+
+  @media (min-width: 768px) {
+    html.home-route {
+      --home-orb-h: min(72vh, 660px);
+    }
   }
 }
 
@@ -728,7 +751,7 @@ html.home-route {
   right: 0;
   z-index: 0;
   width: 100%;
-  height: calc(var(--home-orb-h, min(68vh, 620px)) - var(--home-header-h, 4rem));
+  height: calc(var(--home-orb-h, min(68svh, 620px)) - var(--home-header-h, 4rem));
   max-width: 100%;
   pointer-events: none;
   isolation: isolate;
@@ -835,8 +858,10 @@ html.home-route .home-content-layer {
 /* Document-flow stand-in so content starts below the hero band */
 .home-orb-spacer {
   width: 100%;
-  height: var(--home-orb-h, min(68vh, 620px));
+  height: var(--home-orb-h, min(68svh, 620px));
   pointer-events: none;
+  /* Prevent layout thrash if fonts/images reflow above the fold */
+  flex-shrink: 0;
 }
 
 /* Outer sheet: frosted cover — moderate glass, orb softly visible underneath */
@@ -848,7 +873,7 @@ html.home-route .home-content-layer {
   /* Pull slightly over the orb so the frosted edge reads as a cover */
   margin-top: -2.5rem;
   /* Grow so feed + footer sit on a continuous frosted panel */
-  min-height: calc(100vh - var(--home-orb-h, 60vh) + 2.5rem);
+  min-height: calc(100svh - var(--home-orb-h, 60svh) + 2.5rem);
   border-radius: 1.5rem 1.5rem 0 0;
   border-top: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   /* Denser fill for readability; blur still lets the orb show faintly */
@@ -1223,30 +1248,123 @@ html.light .posts-filter__chip[data-tone='tag'] .posts-filter__chip-count {
   min-width: 0;
 }
 
+/* ---------- Soft image (skeleton while loading) ---------- */
+.soft-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-bg-elevated) 80%, var(--color-bg));
+}
+
+.soft-image__skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--color-bg-elevated) 55%, #1a1d28) 0%,
+    color-mix(in srgb, var(--color-border) 65%, #2a3142) 42%,
+    color-mix(in srgb, var(--color-bg-elevated) 55%, #1a1d28) 78%
+  );
+  background-size: 220% 100%;
+  animation: soft-image-shimmer 1.35s ease-in-out infinite;
+  pointer-events: none;
+}
+
+html.light .soft-image__skeleton {
+  background: linear-gradient(
+    105deg,
+    #e8ecf4 0%,
+    #f4f6fa 40%,
+    #dfe5f0 55%,
+    #e8ecf4 100%
+  );
+  background-size: 220% 100%;
+}
+
+@keyframes soft-image-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.soft-image__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.soft-image.is-ready .soft-image__img {
+  opacity: 1;
+}
+
+.soft-image.is-ready .soft-image__skeleton {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.soft-image__img--cover {
+  object-fit: cover;
+  object-position: center;
+}
+
+.soft-image__img--fill {
+  object-fit: fill;
+  object-position: center;
+}
+
+.soft-image__img--contain {
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soft-image__skeleton {
+    animation: none;
+  }
+
+  .soft-image__img {
+    transition: none;
+  }
+}
+
 /* ---------- Cover fill ----------
-   Covers ship at mixed ratios (1.41 – 1.78); card frames are fixed at 16:9.
-   Shared by every card that shows a cover. */
+   Covers ship at mixed ratios; card frames are fixed (often 16:9 / 16:10).
+   Shared by every card that shows a cover. SoftImage provides the skeleton. */
 .cover-fill {
   position: absolute;
   inset: 0;
   display: block;
   overflow: hidden;
+  width: auto;
+  height: auto;
   background: var(--color-bg);
+  border-radius: inherit;
 }
 
-.cover-fill__art {
+.cover-fill__art,
+.cover-fill .soft-image__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   /*
-    `fill`, deliberately. `contain` left bars beside the 1.41/1.50 covers and
-    `cover` would crop the poster text baked into them, so the frame is filled
-    by distorting: those covers render up to ~26% wider than shot, 16:9 ones
-    are untouched. Re-export the covers at 16:9 to drop the stretch entirely.
+    `cover` fills the frame on every browser (incl. iOS Safari) without the
+    right-side letterbox that `fill` sometimes left on mixed-ratio assets.
+    Slight crop on non-16:9 sources is preferable to empty gutters.
   */
-  object-fit: fill;
-  transition: transform 0.5s ease;
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 0.5s ease, opacity 0.35s ease;
 }
 
 .post-browse-card {
@@ -1274,29 +1392,24 @@ html.light .posts-filter__chip[data-tone='tag'] .posts-filter__chip-count {
 
 .post-browse-card__media {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  /*
+    Only aspect-ratio — do NOT pair with max-height. On iOS Safari that combo
+    shrinks the used width to keep the ratio, leaving an empty gutter on the right.
+  */
   aspect-ratio: 16 / 10;
-  max-height: 11rem;
   background: var(--color-bg);
   flex-shrink: 0;
 }
 
 .post-browse-card__media-link {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
-}
-
-@media (min-width: 640px) {
-  .post-browse-card__media {
-    max-height: 11.75rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .post-browse-card__media {
-    max-height: 12.25rem;
-  }
+  overflow: hidden;
 }
 
 .post-browse-card:hover .cover-fill__art {
@@ -2701,17 +2814,28 @@ html.light .h-rail__nav {
   background: var(--color-bg);
 }
 
-.glass-card__wash img {
+.glass-card__wash-img,
+.glass-card__wash .soft-image {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
+
+.glass-card__wash img,
+.glass-card__wash .soft-image__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transform: scale(1.35);
   /* Only ever seen through the nameplate's backdrop-filter, so it is dimmed
      back down here — a bright wash would cost the white text its contrast */
   filter: blur(28px) saturate(1.8) brightness(0.72);
 }
 
-html.light .glass-card__wash img {
+html.light .glass-card__wash img,
+html.light .glass-card__wash .soft-image__img {
   /* Inverse of the dark rule: here it backs a pale plate, so it is lifted
      rather than dimmed — a dark wash would grey the white nameplate */
   filter: blur(28px) saturate(1.5) brightness(1.35);
@@ -2726,20 +2850,28 @@ html.light .glass-card__wash img {
   aspect-ratio: 16 / 9;
   flex: 0 0 auto;
   overflow: hidden;
+  background: var(--color-bg);
 }
 
-.glass-card__img {
+.glass-card__visual-img,
+.glass-card__visual .soft-image {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
+
+.glass-card__img,
+.glass-card__visual .soft-image__img {
   width: 100%;
   height: 100%;
-  /*
-    `fill`, deliberately — same trade as .cover-fill__art: no bars, no crop,
-    at the cost of stretching the 1.41/1.50 covers to the band's 16:9.
-  */
-  object-fit: fill;
-  transition: transform 0.55s ease;
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 0.55s ease, opacity 0.35s ease;
 }
 
-.glass-card:hover .glass-card__img {
+.glass-card:hover .glass-card__img,
+.glass-card:hover .glass-card__visual .soft-image__img {
   transform: scale(1.03);
 }
 
@@ -5265,6 +5397,7 @@ html.light .music-volume-slider {
 
 /* Shared avatar */
 .friend-avatar {
+  position: relative;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -5298,11 +5431,34 @@ html.light .music-volume-slider {
   box-shadow: 0 0 28px -8px color-mix(in srgb, var(--color-accent) 55%, transparent);
 }
 
+.friend-avatar.is-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--color-bg-elevated) 55%, #1a1d28) 0%,
+    color-mix(in srgb, var(--color-border) 65%, #2a3142) 42%,
+    color-mix(in srgb, var(--color-bg-elevated) 55%, #1a1d28) 78%
+  );
+  background-size: 220% 100%;
+  animation: soft-image-shimmer 1.35s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .friend-avatar__img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.friend-avatar__img.is-ready {
+  opacity: 1;
 }
 
 .friend-avatar__fallback {

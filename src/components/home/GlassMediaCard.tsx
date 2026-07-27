@@ -3,7 +3,7 @@ import type { PostMeta } from '@/lib/posts'
 import type { Project } from '@/data/projects'
 import { statusLabel } from '@/data/projects'
 import { DEFAULT_COVER, site } from '@/config/site'
-import { withBase } from '@/lib/asset'
+import { SoftImage } from '@/components/ui/SoftImage'
 import { categoryLabel } from '@/components/ui/CategoryBadge'
 
 function formatCardDate(iso: string): string {
@@ -93,14 +93,20 @@ export function ProjectGlassCard({ project }: { project: Project }) {
  * panel always has something to blur; the sharp art keeps its own 16:9 band.
  */
 function CardVisual({ cover }: { cover?: string }) {
-  const src = withBase(cover || DEFAULT_COVER)
+  const src = cover || DEFAULT_COVER
   return (
     <>
       <span className="glass-card__wash" aria-hidden>
-        <img src={src} alt="" loading="lazy" />
+        <SoftImage src={src} alt="" fit="cover" skeleton={false} className="glass-card__wash-img" />
       </span>
       <span className="glass-card__visual" aria-hidden>
-        <img src={src} alt="" loading="lazy" className="glass-card__img" />
+        <SoftImage
+          src={src}
+          alt=""
+          fit="cover"
+          className="glass-card__visual-img"
+          imgClassName="glass-card__img"
+        />
         <span className="glass-card__shade" />
       </span>
     </>

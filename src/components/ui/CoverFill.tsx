@@ -1,18 +1,19 @@
-import { withBase } from '@/lib/asset'
+import { SoftImage } from './SoftImage'
 
 /**
- * Cover art stretched edge to edge.
- *
- * Source covers ship at mixed aspect ratios (1.41 – 1.78) while card frames are
- * fixed at 16:9. `contain` left bars beside the narrow ones and `cover` would
- * slice the poster text baked into them, so the frame is filled by distorting
- * instead: `object-fit: fill` (see .cover-fill__art). Nothing is cropped and
- * nothing is left unpainted — the 1.41 covers just render ~26% wider than shot.
+ * Cover art stretched edge to edge inside an absolutely positioned frame.
+ * Uses SoftImage skeleton while loading; `cover` fills the box on all browsers
+ * (including iOS Safari) without letterboxing on the right.
  */
 export function CoverFill({ src, className }: { src: string; className?: string }) {
   return (
-    <span className={['cover-fill', className].filter(Boolean).join(' ')} aria-hidden>
-      <img src={withBase(src)} alt="" loading="lazy" className="cover-fill__art" />
-    </span>
+    <SoftImage
+      src={src}
+      alt=""
+      fit="cover"
+      className={['cover-fill', className].filter(Boolean).join(' ')}
+      imgClassName="cover-fill__art"
+      aria-hidden
+    />
   )
 }

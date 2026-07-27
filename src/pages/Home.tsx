@@ -8,16 +8,16 @@ import { useHomeScroll } from '@/hooks/useHomeScroll'
 
 export function Home() {
   const { scrolled } = useHomeScroll(true)
-  const [mounted, setMounted] = useState(false)
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Mark route so CSS vars can target the home underlay
+  // Mark route so CSS vars can target the home underlay — sync on first paint
+  // via layout effect path would be ideal; useEffect is fine and avoids SSR issues.
   useEffect(() => {
     document.documentElement.classList.add('home-route')
-    return () => document.documentElement.classList.remove('home-route')
+    setPortalTarget(document.body)
+    return () => {
+      document.documentElement.classList.remove('home-route')
+    }
   }, [])
 
   const orbLayer = (
@@ -36,8 +36,9 @@ export function Home() {
       {/*
         Portal to body so the fixed orb sits under the frosted sheet, not trapped
         inside Shell's z-10 stacking context (which made the glass look solid).
+        Spacer below always reserves height so portal mount does not jump layout.
       */}
-      {mounted ? createPortal(orbLayer, document.body) : null}
+      {portalTarget ? createPortal(orbLayer, portalTarget) : null}
       {/* Document-flow stand-in matching hero height */}
       <div className="home-orb-spacer" aria-hidden />
       {/* Frosted sheet that slides over the orb */}

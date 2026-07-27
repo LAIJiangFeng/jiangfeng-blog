@@ -83,12 +83,17 @@ export function HorizontalRail({
     setPage(Math.min(pages - 1, Math.round(ratio * (pages - 1))))
   }, [itemCount, perView])
 
-  /** Start in the middle so both prev/next controls are available. */
+  /**
+   * Desktop: start mid-rail so prev/next both work.
+   * Mobile (1 card / view): stay at start — mid jump feels like a layout jolt
+   * when images finish loading and scrollWidth changes.
+   */
   const centerInitial = useCallback(() => {
     const el = scrollerRef.current
     if (!el || itemCount === 0) return
     const max = Math.max(0, el.scrollWidth - el.clientWidth)
-    if (max > EDGE) {
+    const mobile = window.matchMedia('(max-width: 639px)').matches
+    if (max > EDGE && !mobile) {
       el.scrollLeft = max / 2
     }
     sync()

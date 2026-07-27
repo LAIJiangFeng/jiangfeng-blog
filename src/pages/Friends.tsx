@@ -26,18 +26,23 @@ function FriendAvatar({
   size?: 'sm' | 'md' | 'lg'
 }) {
   const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const src = resolveFriendAvatar(friend)
   const initial = friend.name.trim().charAt(0) || '?'
 
   return (
-    <span className={`friend-avatar friend-avatar--${size} ${className}`.trim()} aria-hidden>
+    <span
+      className={`friend-avatar friend-avatar--${size} ${!loaded && !failed ? 'is-loading' : ''} ${className}`.trim()}
+      aria-hidden
+    >
       {!failed ? (
         <img
           src={src}
           alt=""
           loading="lazy"
           decoding="async"
-          className="friend-avatar__img"
+          className={['friend-avatar__img', loaded ? 'is-ready' : ''].filter(Boolean).join(' ')}
+          onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
         />
       ) : (
