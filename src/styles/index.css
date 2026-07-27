@@ -6147,13 +6147,14 @@ html.light .friend-marquee__fade--right {
 }
 
 /*
-  Mobile:  [marker | card]
-  Desktop: left card | marker | right card  (sides swap by index)
+  DOM order: card → marker → spacer
+  Mobile:    [marker | card]  via explicit grid-column
+  Desktop:   left/right alternating around center spine
 */
 .about-tl {
   --tl-marker: 2.75rem;
   --tl-node: 2.55rem;
-  --tl-gap: 1rem;
+  --tl-gap: 0.85rem;
 
   display: flex;
   flex-direction: column;
@@ -6165,6 +6166,7 @@ html.light .friend-marquee__fade--right {
 
 .about-tl__item {
   display: grid;
+  /* Must match placement below — not auto-flow (DOM is card-first) */
   grid-template-columns: var(--tl-marker) minmax(0, 1fr);
   column-gap: var(--tl-gap);
   align-items: start;
@@ -6172,15 +6174,23 @@ html.light .friend-marquee__fade--right {
   animation-delay: calc(var(--tl-i, 0) * 70ms);
 }
 
-.about-tl__spacer {
-  display: none;
-}
-
+/* Mobile placement: ignore DOM order, force rail left + card right */
 .about-tl__marker {
   position: relative;
+  grid-column: 1;
+  grid-row: 1;
   width: var(--tl-marker);
   min-height: 100%;
   justify-self: center;
+}
+
+.about-tl__card {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.about-tl__spacer {
+  display: none;
 }
 
 .about-tl__spine {
@@ -6251,8 +6261,9 @@ html.light .friend-marquee__fade--right {
 
 .about-tl__card {
   min-width: 0;
+  max-width: 100%;
   margin-bottom: 1.35rem;
-  padding: 1rem 1.1rem 1.05rem;
+  padding: 0.95rem 1rem 1rem;
   border-radius: 1.15rem;
   border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
   background:
@@ -6263,6 +6274,10 @@ html.light .friend-marquee__fade--right {
     );
   box-shadow: 0 14px 36px -28px color-mix(in srgb, var(--color-glow) 45%, transparent);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  /* Prevent CJK/latin from stacking as vertical strips in narrow cells */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: left;
 }
 
 .about-tl__item--last .about-tl__card {
@@ -6321,18 +6336,46 @@ html.light .friend-marquee__fade--right {
 .about-tl__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.2vw, 1.3rem);
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   letter-spacing: -0.01em;
   color: var(--color-text);
+  white-space: normal;
 }
 
 .about-tl__desc {
   margin: 0.4rem 0 0;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   line-height: 1.65;
   color: var(--color-text-muted);
+  white-space: normal;
+}
+
+/* Mobile-only: slightly smaller node so card gets more width */
+@media (max-width: 767px) {
+  .about-tl {
+    --tl-marker: 2.5rem;
+    --tl-node: 2.25rem;
+    --tl-gap: 0.75rem;
+  }
+
+  .about-tl__node {
+    top: 0.25rem;
+  }
+
+  .about-tl__icon-svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .about-tl__card {
+    padding: 0.9rem 0.95rem 0.95rem;
+  }
+
+  .about-tl__meta {
+    justify-content: flex-start;
+  }
 }
 
 /* Desktop: true alternating left / right around center spine */
