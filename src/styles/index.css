@@ -6071,11 +6071,9 @@ html.light .friend-marquee__fade--right {
   box-shadow: 0 0 12px color-mix(in srgb, var(--color-glow) 60%, transparent);
 }
 
-/* ---- Experience: year row as text tabs, not pill track card ---- */
+/* ---- Experience: vertical timeline ---- */
 .about-exp__head {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+  margin-bottom: 1.1rem;
 }
 
 .about-exp__kicker,
@@ -6087,106 +6085,170 @@ html.light .friend-marquee__fade--right {
   color: var(--color-accent);
 }
 
-.about-exp__track {
-  position: relative;
+/*
+  Classic vertical timeline:
+  [marker col] [content]
+  Node center aligns with year line via fixed --tl-year-lh.
+*/
+.about-tl {
+  --tl-marker: 1.35rem;
+  --tl-node: 0.95rem;
+  --tl-gap: 1.1rem;
+  --tl-year-lh: 1.45rem;
+
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.15rem;
-  border: 0;
-  background: transparent;
+  flex-direction: column;
+  margin: 0;
   padding: 0;
-  overflow: visible;
+  list-style: none;
 }
 
-/* Underline indicator instead of floating pill card */
-.about-exp__thumb {
-  display: none;
+.about-tl__item {
+  display: grid;
+  grid-template-columns: var(--tl-marker) minmax(0, 1fr);
+  column-gap: var(--tl-gap);
+  animation: about-swap-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--tl-i, 0) * 70ms);
 }
 
-.about-exp__year {
+.about-tl__marker {
   position: relative;
-  border: 0;
-  background: transparent;
-  padding: 0.35rem 0.85rem 0.5rem;
-  font-family: var(--font-display);
-  font-size: clamp(1rem, 2.2vw, 1.2rem);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: color 0.2s ease;
+  width: var(--tl-marker);
+  min-height: 100%;
 }
 
-.about-exp__year::after {
-  content: '';
+.about-tl__spine {
   position: absolute;
-  left: 0.85rem;
-  right: 0.85rem;
+  left: 50%;
+  top: 0;
   bottom: 0;
-  height: 2px;
+  width: 2px;
+  translate: -50% 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-accent) 75%, transparent),
+    color-mix(in srgb, var(--color-accent) 22%, var(--color-border))
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-glow) 35%, transparent);
+}
+
+.about-tl__item:first-child .about-tl__spine {
+  top: calc(var(--tl-year-lh) / 2);
+}
+
+.about-tl__item--last .about-tl__spine {
+  bottom: auto;
+  height: calc(var(--tl-year-lh) / 2);
+}
+
+.about-tl__node {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--tl-year-lh) / 2);
+  translate: -50% -50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--tl-node);
+  height: var(--tl-node);
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+  background: var(--color-bg);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-bg) 90%, transparent),
+    0 0 14px color-mix(in srgb, var(--color-glow) 45%, transparent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.about-tl__node-core {
+  width: 0.38rem;
+  height: 0.38rem;
   border-radius: 9999px;
   background: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--color-glow) 50%, transparent);
+  box-shadow: 0 0 10px var(--color-glow);
+  transition: transform 0.2s ease;
 }
 
-.about-exp__year.is-active {
-  color: var(--color-accent);
+.about-tl__item:hover .about-tl__node,
+.about-tl__item--current .about-tl__node {
+  border-color: var(--color-accent);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--color-accent) 14%, transparent),
+    0 0 18px color-mix(in srgb, var(--color-glow) 55%, transparent);
+  transform: scale(1.08);
 }
 
-.about-exp__year.is-active::after {
-  transform: scaleX(1);
+.about-tl__item:hover .about-tl__node-core,
+.about-tl__item--current .about-tl__node-core {
+  transform: scale(1.15);
 }
 
-.about-exp__year.is-now:not(.is-active) {
-  color: color-mix(in srgb, var(--color-accent) 50%, var(--color-text-muted));
+.about-tl__item--current .about-tl__node {
+  animation: about-breathe 2.6s ease-in-out infinite;
 }
 
-.about-exp__panel {
-  margin-top: 1.1rem;
-  min-height: 4.25rem;
-  border-left: 2px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
-  padding-left: 1rem;
+.about-tl__content {
+  min-width: 0;
+  padding: 0 0 1.55rem;
 }
 
-.about-exp__panel-inner {
-  animation: about-swap-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+.about-tl__item--last .about-tl__content {
+  padding-bottom: 0.1rem;
 }
 
-.about-exp__title-row {
+.about-tl__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
+  min-height: var(--tl-year-lh);
+  line-height: var(--tl-year-lh);
 }
 
-.about-exp__title {
-  margin: 0;
+.about-tl__year {
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2.5vw, 1.45rem);
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  line-height: var(--tl-year-lh);
+}
+
+.about-tl__now {
+  display: inline-flex;
+  align-items: center;
+  height: 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  padding: 0 0.5rem;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  box-shadow: 0 0 14px -6px var(--color-glow);
+  animation: about-breathe 2.4s ease-in-out infinite;
+}
+
+.about-tl__title {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--color-text);
 }
 
-.about-exp__badge {
-  border-radius: 9999px;
-  border: 1px solid var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  padding: 0.15rem 0.55rem;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--color-accent);
-  animation: about-breathe 2.4s ease-in-out infinite;
-}
-
-.about-exp__desc {
-  margin: 0.45rem 0 0;
+.about-tl__desc {
+  margin: 0.4rem 0 0;
   font-size: 1rem;
   line-height: 1.65;
   color: var(--color-text-muted);
+}
+
+.about-tl__item:hover .about-tl__title {
+  color: color-mix(in srgb, var(--color-accent) 30%, var(--color-text));
 }
 
 /* ---- Skills marquee ---- */
@@ -6271,12 +6333,20 @@ html.light .friend-marquee__fade--right {
   .about-ambient__orb,
   .about-top__ring,
   .about-focus__pulse,
-  .about-exp__badge,
+  .about-tl__item,
+  .about-tl__item--current .about-tl__node,
+  .about-tl__now,
   .about-skills__track,
-  .about-exp__panel-inner,
   .about-focus__line {
     animation: none !important;
     transition: none !important;
+  }
+
+  .about-tl__item:hover .about-tl__node,
+  .about-tl__item--current .about-tl__node,
+  .about-tl__item:hover .about-tl__node-core,
+  .about-tl__item--current .about-tl__node-core {
+    transform: none !important;
   }
 
   .about-focus__line {
