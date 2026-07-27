@@ -50,7 +50,10 @@ function shuffleIndex(len: number, exclude: number): number {
 export function MusicProvider({ children }: { children: ReactNode }) {
   const tracks = useMemo(() => getPlaylist(), [])
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const wantPlayRef = useRef(false)
+  /** Prefer playing on entry; browsers may block until a user gesture. */
+  const wantPlayRef = useRef(true)
+  /** True only after the user explicitly pauses — skips gesture auto-resume. */
+  const userPausedRef = useRef(false)
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -71,7 +74,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const audio = new Audio()
-    audio.preload = 'metadata'
+    audio.preload = 'auto'
     audio.volume = 0.7
     audioRef.current = audio
 
@@ -79,6 +82,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const onMeta = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
     const onPlay = () => {
       wantPlayRef.current = true
+      userPausedRef.current = false
       setPlaying(true)
     }
     const onPause = () => {
@@ -109,9 +113,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         setIndex((i + 1) % list.length)
         return
       }
-      wantPlayRef.current = false
-      setPlaying(false)
-      setCurrentTime(0)
+      // End of list in order mode → wrap for continuous background listening
+      wantPlayRef.current = true
+      setIndex(0)
     }
 
     audio.addEventListener('timeupdate', onTime)
@@ -145,11 +149,36 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
     if (shouldPlay) {
       void audio.play().catch(() => {
-        wantPlayRef.current = false
+        // Autoplay blocked — wait for first user gesture (see unlock effect)
         setPlaying(false)
       })
     }
   }, [index, tracks])
+
+  // If the browser blocks autoplay with sound, start on the first interaction.
+  useEffect(() => {
+    if (!tracks.length) return
+
+    const unlock = () => {
+      if (userPausedRef.current) return
+      const audio = audioRef.current
+      if (!audio || !audio.paused) return
+      wantPlayRef.current = true
+      void audio.play().catch(() => {
+        setPlaying(false)
+      })
+    }
+
+    const events = ['pointerdown', 'keydown', 'touchstart'] as const
+    for (const ev of events) {
+      document.addEventListener(ev, unlock, { passive: true })
+    }
+    return () => {
+      for (const ev of events) {
+        document.removeEventListener(ev, unlock)
+      }
+    }
+  }, [tracks.length])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -160,14 +189,15 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const play = useCallback(() => {
     const audio = audioRef.current
     if (!audio || !tracksRef.current.length) return
+    userPausedRef.current = false
     wantPlayRef.current = true
     void audio.play().catch(() => {
-      wantPlayRef.current = false
       setPlaying(false)
     })
   }, [])
 
   const pause = useCallback(() => {
+    userPausedRef.current = true
     wantPlayRef.current = false
     audioRef.current?.pause()
   }, [])
