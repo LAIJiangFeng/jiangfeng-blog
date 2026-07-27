@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { AboutTimelineIcon, AboutTimelineItem } from '@/data/about'
+import FadeContent from '@/components/react-bits/FadeContent'
 
 type Props = { items: AboutTimelineItem[] }
 
@@ -38,9 +39,7 @@ function TimelineIcon({ icon, index }: { icon?: AboutTimelineIcon; index: number
 }
 
 /**
- * Alternating center-spine timeline (desktop):
- * left card | icon node | right card
- * Mobile collapses to single-column with left rail.
+ * Alternating center-spine timeline + FadeContent on each card.
  */
 export function AboutTimeline({ items }: Props) {
   return (
@@ -65,16 +64,23 @@ export function AboutTimeline({ items }: Props) {
                 .join(' ')}
               style={{ ['--tl-i' as string]: i }}
             >
-              <div className="about-tl__card">
-                <div className="about-tl__meta">
-                  <time className="about-tl__year" dateTime={item.year}>
-                    {item.year}
-                  </time>
-                  {item.current && <span className="about-tl__now">现在</span>}
+              <FadeContent
+                duration={0.65}
+                delay={0.04 * i}
+                threshold={0.12}
+                className="about-tl__fade"
+              >
+                <div className="about-tl__card">
+                  <div className="about-tl__meta">
+                    <time className="about-tl__year" dateTime={item.year}>
+                      {item.year}
+                    </time>
+                    {item.current && <span className="about-tl__now">现在</span>}
+                  </div>
+                  <h3 className="about-tl__title">{item.title}</h3>
+                  <p className="about-tl__desc">{item.description}</p>
                 </div>
-                <h3 className="about-tl__title">{item.title}</h3>
-                <p className="about-tl__desc">{item.description}</p>
-              </div>
+              </FadeContent>
 
               <div className="about-tl__marker" aria-hidden>
                 <span className="about-tl__spine" />
@@ -83,7 +89,6 @@ export function AboutTimeline({ items }: Props) {
                 </span>
               </div>
 
-              {/* Spacer keeps grid balance on desktop alternating layout */}
               <div className="about-tl__spacer" aria-hidden />
             </li>
           )

@@ -47,17 +47,9 @@ export function PostDetail() {
         <div className="reading-article">
           <Link to="/posts" className="reading-article__back">
             <span className="reading-article__back-icon" aria-hidden>
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden>
-                <path
-                  d="M9.5 3.25 4.75 8l4.75 4.75"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              ‹
             </span>
-            <span className="reading-article__back-label">全部文章</span>
+            全部文章
           </Link>
           <article ref={articleRef} className="prose-blog prose-blog--article">
             <PostHeader post={post} />

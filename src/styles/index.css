@@ -3190,25 +3190,78 @@ html.light .glass-card__shade {
   }
 }
 
-/* Mobile: still one row via horizontal scroll when multiple cards */
+/*
+  Mobile: vertical compact list (thumb + title + meta).
+  Horizontal carousel wastes viewport height, hides siblings, and fights
+  vertical reading scroll — stack full-width rows instead.
+*/
 @media (max-width: 767px) {
+  .related-posts {
+    margin-top: 1.75rem;
+    padding-top: 1.75rem;
+  }
+
+  .related-posts__title {
+    margin-bottom: 0.9rem;
+    font-size: 1.2rem;
+  }
+
   .related-posts__grid {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(17.5rem, 80vw);
-    grid-template-columns: none;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    gap: 1rem;
-    padding-bottom: 0.35rem;
-    margin-inline: -0.15rem;
-    padding-inline: 0.15rem;
-    scrollbar-width: thin;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    overflow: visible;
   }
 
   .related-posts__item {
-    scroll-snap-align: start;
+    min-width: 0;
+  }
+
+  .related-posts .post-browse-card {
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: 0.85rem;
+    min-height: 5.25rem;
+  }
+
+  .related-posts .post-browse-card:hover {
+    transform: none;
+  }
+
+  .related-posts .post-browse-card__media {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    max-height: none;
+    aspect-ratio: auto;
+    align-self: stretch;
+  }
+
+  .related-posts .post-browse-card__body {
+    padding: 0.7rem 0.85rem 0.75rem;
+    gap: 0.3rem;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .related-posts .post-browse-card__title {
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .related-posts .post-browse-card__title a {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  /* Drop summary + tags on narrow screens — title + date/category is enough */
+  .related-posts .post-browse-card__summary,
+  .related-posts .post-browse-card__tags {
+    display: none;
+  }
+
+  .related-posts .post-browse-card__meta {
+    font-size: 0.65rem;
+    gap: 0.2rem 0.3rem;
   }
 }
 
@@ -3449,20 +3502,21 @@ html.light .glass-card__shade {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  /* Fixed height + zero vertical padding keeps CJK + icon optically centered */
-  height: 2.15rem;
-  min-height: 2.15rem;
-  padding: 0 0.9rem 0 0.7rem;
+  gap: 0.12em;
+  box-sizing: border-box;
+  /* Symmetric vertical padding + line-height:1 — text and glyph share one em box */
+  padding: 0.45em 0.9em 0.45em 0.7em;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-bg-elevated) 88%, transparent);
+  font-family: var(--font-sans);
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.01em;
   color: var(--color-text-muted);
   text-decoration: none;
+  white-space: nowrap;
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
@@ -3470,34 +3524,16 @@ html.light .glass-card__shade {
     box-shadow 0.2s ease;
 }
 
-.reading-article__back > span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.reading-article__back-label {
-  /* Optical center for CJK in pill buttons (baseline sits slightly low otherwise) */
-  transform: translateY(0.04em);
-}
-
+/* Same font metrics as the label — no SVG baseline mismatch */
 .reading-article__back-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 0.9rem;
-  height: 0.9rem;
-  line-height: 0;
-  color: var(--color-text-muted);
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.reading-article__back-icon svg {
-  display: block;
-  width: 14px;
-  height: 14px;
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 1.35em;
+  font-weight: 400;
+  line-height: 1;
+  /* Single-line chevron; optical nudge for CJK cap height */
+  transform: translateY(-0.02em);
+  transition: transform 0.2s ease;
 }
 
 .reading-article__back:hover {
@@ -3508,8 +3544,7 @@ html.light .glass-card__shade {
 }
 
 .reading-article__back:hover .reading-article__back-icon {
-  color: var(--color-accent);
-  transform: translateX(-1px);
+  transform: translateY(-0.02em) translateX(-1px);
 }
 
 /* ---------- Back to top FAB ---------- */
@@ -3586,9 +3621,8 @@ html.light .glass-card__shade {
 
 /* ---------- Article header ---------- */
 .post-header {
-  /* Tighter bottom so tags sit closer to the divider */
-  margin: 0 0 1.35rem;
-  padding: 0 0 0.95rem;
+  margin: 0 0 0.75rem;
+  padding: 0 0 0.2rem;
   border-bottom: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
 }
 
@@ -3597,7 +3631,7 @@ html.light .glass-card__shade {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.65rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .post-header__date,
@@ -3626,7 +3660,7 @@ html.light .glass-card__shade {
 }
 
 .post-header__summary {
-  margin: 0.9rem 0 0;
+  margin: 0.5rem 0 0;
   max-width: 40rem;
   font-size: 1.05rem;
   line-height: 1.75;
@@ -3635,20 +3669,25 @@ html.light .glass-card__shade {
   text-wrap: pretty;
 }
 
+/* Base tag list (overridden again after .prose-blog ul/li for cascade safety) */
 .post-header__tags {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
   list-style: none;
-  margin: 0.75rem 0 0;
+  /* Sit tight under summary / title */
+  margin: 0.22rem 0 0;
   padding: 0;
 }
 
 .post-header__tag-item {
   display: inline-flex;
   align-items: center;
+  margin: 0;
+  padding: 0;
   line-height: 1;
+  list-style: none;
 }
 
 /* ---------- Long-form article ---------- */
@@ -3753,6 +3792,36 @@ html.light .glass-card__shade {
 
 .prose-blog li + li {
   margin-top: 0.45em;
+}
+
+/*
+  Header tags sit inside .prose-blog, so they inherit article list metrics
+  (.prose-blog ul margin-bottom 1.2em, li line-height 1.8) — that is the
+  large empty band under the tags in the reading header. Reset hard.
+*/
+.prose-blog ul.post-header__tags {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.22rem 0 0 !important;
+  padding: 0 !important;
+  padding-left: 0 !important;
+}
+
+.prose-blog ul.post-header__tags > li {
+  display: inline-flex !important;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-left: 0 !important;
+  line-height: 1 !important;
+  list-style: none;
+}
+
+.prose-blog ul.post-header__tags > li + li {
+  margin-top: 0 !important;
 }
 
 .prose-blog code {
@@ -5981,12 +6050,21 @@ html.light .friend-marquee__fade--right {
   gap: 0.5rem 0.85rem;
 }
 
-.about-top__cn {
+.about-top__avatar-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.about-top__cn,
+.about-top .blur-text--title {
   margin: 0;
+  justify-content: center;
   font-family: var(--font-display);
   font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.03em;
+  color: var(--color-text);
 }
 
 .about-top__en {
@@ -5999,16 +6077,24 @@ html.light .friend-marquee__fade--right {
 .about-top__tag {
   margin: 0.55rem 0 0;
   font-size: clamp(1.05rem, 2.2vw, 1.25rem);
-  color: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
   font-weight: 500;
 }
 
-.about-top__story {
+.about-top__shiny {
+  display: inline-block;
+  font-size: inherit;
+  font-weight: 500;
+}
+
+.about-top__story,
+.about-top .blur-text--story {
   margin: 0.85rem auto 0;
   max-width: 36rem;
+  justify-content: center;
   font-size: clamp(0.98rem, 1.6vw, 1.08rem);
   line-height: 1.75;
   color: var(--color-text-muted);
+  text-align: center;
 }
 
 .about-top__badges {
@@ -6055,12 +6141,20 @@ html.light .friend-marquee__fade--right {
   );
 }
 
-/* ---- Focus carousel ---- */
-.about-focus__label {
+/*
+  Focus / Now — React Bits TrueFocus (no card).
+*/
+.about-focus__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+}
+
+.about-focus__kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  gap: 0.45rem;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -6069,66 +6163,37 @@ html.light .friend-marquee__fade--right {
 }
 
 .about-focus__pulse {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.42rem;
+  height: 0.42rem;
   border-radius: 9999px;
   background: #34d399;
-  box-shadow: 0 0 12px #34d399;
+  box-shadow: 0 0 10px #34d399;
   animation: about-breathe 1.8s ease-in-out infinite;
 }
 
 .about-focus__stage {
-  position: relative;
-  min-height: 2.1rem;
-}
-
-.about-focus__line {
-  position: absolute;
-  inset: 0 auto auto 0;
-  margin: 0;
   width: 100%;
-  font-family: var(--font-display);
-  font-size: clamp(1.25rem, 3vw, 1.65rem);
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-
-.about-focus__line.is-active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  position: relative;
-}
-
-.about-focus__dots {
+  max-width: 42rem;
+  margin-inline: auto;
+  min-height: 3.5rem;
   display: flex;
-  gap: 0.4rem;
-  margin-top: 0.85rem;
+  align-items: center;
+  justify-content: center;
 }
 
-.about-focus__dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  padding: 0;
-  border: 0;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
-  cursor: pointer;
-  transition: width 0.25s ease, background 0.25s ease;
+.about-focus__true {
+  gap: 0.65rem 1rem !important;
+  row-gap: 0.85rem !important;
+  padding: 0.35rem 0.25rem 0.85rem;
 }
 
-.about-focus__dot.is-active {
-  width: 1.35rem;
-  background: var(--color-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--color-glow) 60%, transparent);
+.about-focus__true-word {
+  font-family: var(--font-display) !important;
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  line-height: 1.35;
 }
 
 /* ---- Experience: alternating center-spine timeline ---- */
@@ -6170,8 +6235,6 @@ html.light .friend-marquee__fade--right {
   grid-template-columns: var(--tl-marker) minmax(0, 1fr);
   column-gap: var(--tl-gap);
   align-items: start;
-  animation: about-swap-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--tl-i, 0) * 70ms);
 }
 
 /* Mobile placement: ignore DOM order, force rail left + card right */
@@ -6184,9 +6247,16 @@ html.light .friend-marquee__fade--right {
   justify-self: center;
 }
 
-.about-tl__card {
+/* FadeContent wraps the card — place the wrapper on the grid */
+.about-tl__fade {
   grid-column: 2;
   grid-row: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.about-tl__card {
+  width: 100%;
 }
 
 .about-tl__spacer {
@@ -6400,9 +6470,12 @@ html.light .friend-marquee__fade--right {
   }
 
   /* left side: card | marker | spacer */
-  .about-tl__item--left .about-tl__card {
+  .about-tl__item--left .about-tl__fade {
     grid-column: 1;
     grid-row: 1;
+  }
+
+  .about-tl__item--left .about-tl__card {
     text-align: right;
   }
 
@@ -6431,9 +6504,12 @@ html.light .friend-marquee__fade--right {
     grid-row: 1;
   }
 
-  .about-tl__item--right .about-tl__card {
+  .about-tl__item--right .about-tl__fade {
     grid-column: 3;
     grid-row: 1;
+  }
+
+  .about-tl__item--right .about-tl__card {
     text-align: left;
   }
 
@@ -6455,36 +6531,31 @@ html.light .friend-marquee__fade--right {
   }
 }
 
-/* ---- Skills marquee ---- */
+/* ---- Skills marquee (React Bits LogoLoop) ---- */
 .about-skills__head {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
+  text-align: center;
 }
 
 .about-skills__rail {
   position: relative;
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-  padding: 0.15rem 0;
+  padding: 0.35rem 0;
 }
 
-.about-skills__track {
-  display: flex;
-  width: max-content;
-  gap: 0.6rem;
-  animation: about-marquee 26s linear infinite;
-}
-
-.about-skills__rail:hover .about-skills__track {
-  animation-play-state: paused;
+.about-skills__loop {
+  /* LogoLoop already fades edges when fadeOut */
+  --logoloop-fadeColorAuto: var(--color-bg);
 }
 
 .about-skills__chip {
-  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   border-radius: 9999px;
   border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
   background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-  padding: 0.45rem 0.95rem;
+  padding: 0.42rem 0.95rem;
   font-size: 0.9rem;
+  line-height: 1.2;
   color: var(--color-text);
   white-space: nowrap;
   transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
@@ -6494,10 +6565,6 @@ html.light .friend-marquee__fade--right {
   border-color: var(--color-accent);
   color: var(--color-accent);
   box-shadow: 0 0 18px -8px var(--color-glow);
-}
-
-.about-skills__fade {
-  display: none;
 }
 
 /* ---- Motion ---- */
@@ -6539,9 +6606,7 @@ html.light .friend-marquee__fade--right {
   .about-focus__pulse,
   .about-tl__item,
   .about-tl__item--current .about-tl__node,
-  .about-tl__now,
-  .about-skills__track,
-  .about-focus__line {
+  .about-tl__now {
     animation: none !important;
     transition: none !important;
   }
@@ -6552,14 +6617,8 @@ html.light .friend-marquee__fade--right {
     transform: none !important;
   }
 
-  .about-focus__line {
-    position: relative;
-    opacity: 1;
-    transform: none;
-  }
-
-  .about-focus__line:not(.is-active) {
-    display: none;
+  .about-focus__true-word {
+    filter: none !important;
   }
 }
 

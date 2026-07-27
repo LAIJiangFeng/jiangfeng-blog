@@ -54,6 +54,8 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const wantPlayRef = useRef(true)
   /** True only after the user explicitly pauses — skips gesture auto-resume. */
   const userPausedRef = useRef(false)
+  /** Bumps on each play attempt so stale play() rejections cannot clobber UI. */
+  const playGenRef = useRef(0)
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -72,13 +74,40 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   const current = tracks[index] ?? null
 
+  /** Start playback; ignore outdated promise rejections from earlier attempts. */
+  const tryPlay = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio || !tracksRef.current.length) return
+
+    userPausedRef.current = false
+    wantPlayRef.current = true
+    const gen = ++playGenRef.current
+
+    void audio
+      .play()
+      .then(() => {
+        if (gen !== playGenRef.current) return
+        // Source of truth: element is actually playing
+        if (!audio.paused) setPlaying(true)
+      })
+      .catch(() => {
+        if (gen !== playGenRef.current) return
+        // Only mark paused if this attempt still owns the generation and audio is idle
+        if (audio.paused) setPlaying(false)
+      })
+  }, [])
+
   useEffect(() => {
     const audio = new Audio()
     audio.preload = 'auto'
     audio.volume = 0.7
     audioRef.current = audio
 
-    const onTime = () => setCurrentTime(audio.currentTime || 0)
+    const onTime = () => {
+      setCurrentTime(audio.currentTime || 0)
+      // Heal desync: time advances only while actually playing
+      if (!audio.paused) setPlaying(true)
+    }
     const onMeta = () => setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
     const onPlay = () => {
       wantPlayRef.current = true
@@ -86,7 +115,13 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       setPlaying(true)
     }
     const onPause = () => {
-      setPlaying(false)
+      // load() / src change also fires `pause`. If we still intend to play, do not
+      // flip the UI to PAUSED — tryPlay / `playing` will set the real state.
+      if (userPausedRef.current || !wantPlayRef.current) {
+        setPlaying(false)
+        return
+      }
+      if (!audio.paused) setPlaying(true)
     }
     const onEnded = () => {
       const m = modeRef.current
@@ -96,11 +131,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
       if (m === 'single') {
         audio.currentTime = 0
-        wantPlayRef.current = true
-        void audio.play().catch(() => {
-          wantPlayRef.current = false
-          setPlaying(false)
-        })
+        tryPlay()
         return
       }
       if (m === 'shuffle') {
@@ -117,24 +148,34 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       wantPlayRef.current = true
       setIndex(0)
     }
+    const onError = () => {
+      wantPlayRef.current = false
+      setPlaying(false)
+    }
 
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('loadedmetadata', onMeta)
     audio.addEventListener('durationchange', onMeta)
     audio.addEventListener('play', onPlay)
+    audio.addEventListener('playing', onPlay)
     audio.addEventListener('pause', onPause)
     audio.addEventListener('ended', onEnded)
-    audio.addEventListener('error', () => {
-      wantPlayRef.current = false
-      setPlaying(false)
-    })
+    audio.addEventListener('error', onError)
 
     return () => {
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onMeta)
+      audio.removeEventListener('durationchange', onMeta)
+      audio.removeEventListener('play', onPlay)
+      audio.removeEventListener('playing', onPlay)
+      audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('ended', onEnded)
+      audio.removeEventListener('error', onError)
       audio.pause()
       audio.src = ''
       audioRef.current = null
     }
-  }, [])
+  }, [tryPlay])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -142,18 +183,15 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     if (!audio || !track) return
 
     const shouldPlay = wantPlayRef.current
+    // Invalidate in-flight play() from the previous track / attempt
+    playGenRef.current += 1
     audio.src = track.src
     audio.load()
     setCurrentTime(0)
     setDuration(0)
 
-    if (shouldPlay) {
-      void audio.play().catch(() => {
-        // Autoplay blocked — wait for first user gesture (see unlock effect)
-        setPlaying(false)
-      })
-    }
-  }, [index, tracks])
+    if (shouldPlay) tryPlay()
+  }, [index, tracks, tryPlay])
 
   // If the browser blocks autoplay with sound, start on the first interaction.
   useEffect(() => {
@@ -162,11 +200,12 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const unlock = () => {
       if (userPausedRef.current) return
       const audio = audioRef.current
-      if (!audio || !audio.paused) return
-      wantPlayRef.current = true
-      void audio.play().catch(() => {
-        setPlaying(false)
-      })
+      if (!audio) return
+      if (!audio.paused) {
+        setPlaying(true)
+        return
+      }
+      tryPlay()
     }
 
     const events = ['pointerdown', 'keydown', 'touchstart'] as const
@@ -178,7 +217,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         document.removeEventListener(ev, unlock)
       }
     }
-  }, [tracks.length])
+  }, [tracks.length, tryPlay])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -187,23 +226,20 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   }, [volume, muted])
 
   const play = useCallback(() => {
-    const audio = audioRef.current
-    if (!audio || !tracksRef.current.length) return
-    userPausedRef.current = false
-    wantPlayRef.current = true
-    void audio.play().catch(() => {
-      setPlaying(false)
-    })
-  }, [])
+    tryPlay()
+  }, [tryPlay])
 
   const pause = useCallback(() => {
     userPausedRef.current = true
     wantPlayRef.current = false
+    playGenRef.current += 1
     audioRef.current?.pause()
+    setPlaying(false)
   }, [])
 
   const toggle = useCallback(() => {
-    if (audioRef.current && !audioRef.current.paused) pause()
+    const audio = audioRef.current
+    if (audio && !audio.paused) pause()
     else play()
   }, [play, pause])
 
@@ -211,6 +247,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const list = tracksRef.current
     if (!list.length) return
     wantPlayRef.current = true
+    userPausedRef.current = false
     const i = indexRef.current
     if (modeRef.current === 'shuffle') setIndex(shuffleIndex(list.length, i))
     else setIndex((i + 1) % list.length)
@@ -225,6 +262,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       return
     }
     wantPlayRef.current = true
+    userPausedRef.current = false
     const i = indexRef.current
     if (modeRef.current === 'shuffle') setIndex(shuffleIndex(list.length, i))
     else setIndex((i - 1 + list.length) % list.length)
@@ -259,6 +297,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         return
       }
       wantPlayRef.current = true
+      userPausedRef.current = false
       setIndex(i)
     },
     [toggle],

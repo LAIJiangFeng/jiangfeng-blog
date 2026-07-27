@@ -1,72 +1,51 @@
-import { useCallback, useEffect, useState } from 'react'
+import TrueFocus from '@/components/react-bits/TrueFocus'
+import FadeContent from '@/components/react-bits/FadeContent'
 
 type Props = {
   title: string
   items: string[]
-  /** Auto-advance interval ms */
-  intervalMs?: number
 }
 
-/** Vertical focus carousel — one line at a time with crossfade */
-export function AboutFocusCarousel({ title, items, intervalMs = 2800 }: Props) {
-  const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const count = items.length
+/**
+ * “此刻” — React Bits TrueFocus cycles focus across now-items.
+ * Separator must not appear inside item labels.
+ */
+const SEP = ' · '
 
-  const go = useCallback(
-    (next: number) => {
-      if (count === 0) return
-      setIndex(((next % count) + count) % count)
-    },
-    [count],
-  )
+export function AboutFocusCarousel({ title, items }: Props) {
+  if (items.length === 0) return null
 
-  useEffect(() => {
-    if (paused || count <= 1) return
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % count)
-    }, intervalMs)
-    return () => window.clearInterval(id)
-  }, [paused, count, intervalMs])
-
-  if (count === 0) return null
+  const sentence = items.join(SEP)
 
   return (
-    <div
-      className="about-focus"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <div className="about-focus__label">
-        <span className="about-focus__pulse" aria-hidden />
-        {title}
-      </div>
+    <section className="about-focus" aria-label={title}>
+      <header className="about-focus__head">
+        <span className="about-focus__kicker">
+          <span className="about-focus__pulse" aria-hidden />
+          {title}
+        </span>
+      </header>
 
-      <div className="about-focus__stage" aria-live="polite">
-        {items.map((item, i) => (
-          <p
-            key={item}
-            className={['about-focus__line', i === index ? 'is-active' : ''].filter(Boolean).join(' ')}
-            aria-hidden={i !== index}
-          >
-            {item}
-          </p>
-        ))}
-      </div>
+      <FadeContent duration={0.7} delay={0.05} threshold={0.15} className="about-focus__stage">
+        <TrueFocus
+          sentence={sentence}
+          separator={SEP}
+          blurAmount={4}
+          borderColor="var(--color-accent)"
+          glowColor="color-mix(in srgb, var(--color-glow) 70%, transparent)"
+          animationDuration={0.45}
+          pauseBetweenAnimations={1.6}
+          className="about-focus__true"
+          wordClassName="about-focus__true-word"
+        />
+      </FadeContent>
 
-      <div className="about-focus__dots" role="tablist" aria-label={title}>
-        {items.map((item, i) => (
-          <button
-            key={item}
-            type="button"
-            role="tab"
-            aria-selected={i === index}
-            aria-label={item}
-            className={['about-focus__dot', i === index ? 'is-active' : ''].filter(Boolean).join(' ')}
-            onClick={() => go(i)}
-          />
+      {/* Accessible static list for SR / no-JS fallbacks of focus state */}
+      <ul className="sr-only">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   )
 }

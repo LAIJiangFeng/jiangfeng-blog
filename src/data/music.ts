@@ -30,20 +30,6 @@ export const playlist: Track[] = [
     cover: '/music/covers/default.svg',
   },
   {
-    id: 'weightlessness',
-    title: 'Weightlessness',
-    artist: 'Kirill Kharchenko',
-    src: '/music/weightlessness.mp3',
-    cover: '/music/covers/default.svg',
-  },
-  {
-    id: 'comptine',
-    title: "Comptine d'un autre été",
-    artist: 'Yann Tiersen',
-    src: '/music/comptine.mp3',
-    cover: '/music/covers/default.svg',
-  },
-  {
     id: 'gymnopedie-no1',
     title: 'Gymnopédie No.1',
     artist: 'Erik Satie',
