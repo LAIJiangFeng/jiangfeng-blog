@@ -1,4 +1,5 @@
 import type { ImgHTMLAttributes } from 'react'
+import { withBase } from '@/lib/asset'
 
 export interface MDXImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   alt: string
@@ -8,7 +9,7 @@ export interface MDXImageProps extends ImgHTMLAttributes<HTMLImageElement> {
 export function MDXImage({ alt, src, className, ...rest }: MDXImageProps) {
   return (
     <img
-      src={src}
+      src={withBase(src)}
       alt={alt}
       loading="lazy"
       className={['max-w-full h-auto rounded-md', className].filter(Boolean).join(' ')}

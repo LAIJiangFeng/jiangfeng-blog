@@ -8,12 +8,12 @@ const root = path.resolve(__dirname, '..')
 const postsDir = path.join(root, 'content', 'posts')
 const distDir = path.join(root, 'dist')
 
-// 与 src/config/site.ts 保持同步
+// 与 src/config/site.ts 的 site.url 保持同步（GitHub Pages 预览 → 日后自有域名）
 const site = {
   name: 'Jiangfeng Blog',
   title: 'Jiangfeng Blog — 个人博客',
   description: '技术笔记、生活碎片，以及一些安静的思考。',
-  url: 'https://example.com',
+  url: 'https://laijiangfeng.github.io/jiangfeng-blog',
   author: { name: '江枫' },
 }
 

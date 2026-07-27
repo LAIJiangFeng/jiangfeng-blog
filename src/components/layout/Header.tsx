@@ -7,6 +7,7 @@ import { useTheme } from '@/components/theme/ThemeProvider'
 import { useHomeScroll } from '@/hooks/useHomeScroll'
 import { MobileNav } from './MobileNav'
 import { SearchNavButton } from './SearchNavButton'
+import { withBase } from '@/lib/asset'
 import { navLinks } from './navLinks'
 
 export type HeaderVariant = 'default' | 'overlay'
@@ -64,7 +65,7 @@ export function Header({ variant = 'default' }: { variant?: HeaderVariant }) {
               : 'text-[var(--color-text)] hover:text-[var(--color-accent)]',
           ].join(' ')}
         >
-          <img src="/logo.svg" alt="" className="logo-mark__img" width={28} height={28} decoding="async" />
+          <img src={withBase('/logo.svg')} alt="" className="logo-mark__img" width={28} height={28} decoding="async" />
           <span className="logo-mark__text">{site.name}</span>
         </Link>
 

@@ -1,3 +1,5 @@
+import { withBase } from '@/lib/asset'
+
 export type AboutSocialInput = {
   github: string
   csdn: string
@@ -42,6 +44,6 @@ export function buildAboutConnectLinks(
     links.push({ key: 'site', label: '个人网站', href: options.authorUrl, external: true })
   }
 
-  links.push({ key: 'rss', label: 'RSS 订阅', href: '/rss.xml', reloadDocument: true })
+  links.push({ key: 'rss', label: 'RSS 订阅', href: withBase('/rss.xml'), reloadDocument: true })
   return links
 }

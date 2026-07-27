@@ -12,7 +12,7 @@ const emptySocial = {
 describe('buildAboutConnectLinks', () => {
   it('always includes RSS', () => {
     const links = buildAboutConnectLinks(emptySocial)
-    expect(links.some((l) => l.key === 'rss' && l.href === '/rss.xml')).toBe(true)
+    expect(links.some((l) => l.key === 'rss' && l.href.endsWith('/rss.xml'))).toBe(true)
   })
 
   it('includes only configured social entries', () => {

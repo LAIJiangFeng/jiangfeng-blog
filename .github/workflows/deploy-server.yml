@@ -1,0 +1,90 @@
+# 自有服务器部署（预留，默认不自动跑）
+#
+# 使用前在 GitHub 仓库 Settings → Secrets and variables → Actions 添加：
+#   SERVER_HOST       服务器 IP 或域名
+#   SERVER_USER       SSH 用户名（如 root / ubuntu / deploy）
+#   SERVER_SSH_KEY    私钥全文（-----BEGIN ... PRIVATE KEY-----）
+#   SERVER_PORT       可选，默认 22
+#   SERVER_PATH       可选，默认 /var/www/jiangfeng-blog
+#
+# 服务器侧：装好 Nginx（见 deploy/nginx.conf.example），目录属主给部署用户可写。
+# 切域名后请同步改 src/config/site.ts 与 scripts/generate-rss.mjs 的 url，BASE_PATH 用 /
+#
+# 就绪后：Actions → Deploy to Own Server → Run workflow
+# 全面切换时：把下面 push 的注释打开，并关掉或删掉 deploy.yml（GitHub Pages）
+name: Deploy to Own Server
+
+on:
+  # push:
+  #   branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: server-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          # 自有域名一般挂在根路径；若挂子路径改成 /blog 之类
+          BASE_PATH: /
+        run: npm run build
+
+      - name: Require deploy secrets
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          missing=0
+          [ -z "$SERVER_HOST" ] && echo "Missing secret: SERVER_HOST" && missing=1
+          [ -z "$SERVER_USER" ] && echo "Missing secret: SERVER_USER" && missing=1
+          [ -z "$SERVER_SSH_KEY" ] && echo "Missing secret: SERVER_SSH_KEY" && missing=1
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::请先在仓库 Secrets 中配置 SERVER_HOST / SERVER_USER / SERVER_SSH_KEY"
+            exit 1
+          fi
+
+      - name: Deploy via rsync over SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          SERVER_PATH: ${{ secrets.SERVER_PATH }}
+        run: |
+          set -euo pipefail
+          PORT="${SERVER_PORT:-22}"
+          DEST="${SERVER_PATH:-/var/www/jiangfeng-blog}"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$PORT" -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p $PORT -o StrictHostKeyChecking=accept-new" \
+            dist/ \
+            "${SERVER_USER}@${SERVER_HOST}:${DEST}/"
+
+          rm -f ~/.ssh/deploy_key
+          echo "Deployed to ${SERVER_USER}@${SERVER_HOST}:${DEST}"

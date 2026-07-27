@@ -46,7 +46,15 @@ function mdxSkipRaw(): Plugin {
   } as Plugin
 }
 
+/**
+ * GitHub project pages need e.g. `/jiangfeng-blog/`.
+ * Set BASE_PATH in CI (workflow) or local `.env` — default `/` for local dev.
+ */
+const rawBase = process.env.BASE_PATH?.trim() || '/'
+const base = rawBase === '/' ? '/' : rawBase.endsWith('/') ? rawBase : `${rawBase}/`
+
 export default defineConfig({
+  base,
   plugins: [mdxSkipRaw(), react(), tailwindcss()],
   resolve: {
     alias: {
@@ -60,3 +68,4 @@ export default defineConfig({
     passWithNoTests: true,
   },
 })
+

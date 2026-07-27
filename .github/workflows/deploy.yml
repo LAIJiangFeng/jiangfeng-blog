@@ -1,0 +1,64 @@
+# 当前默认：合并 / push 到 main → 构建并部署到 GitHub Pages（先预览）
+# 站点：https://laijiangfeng.github.io/jiangfeng-blog/
+#
+# 以后迁到自己的服务器：
+# 1. 在仓库 Settings → Secrets 配好 SSH 相关密钥
+# 2. 用 Actions 手动跑「Deploy to Own Server」，或把那边 workflow 的 push 触发打开
+# 3. 本文件可改成只保留 workflow_dispatch，或直接删掉 / 关掉 Pages
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          # 项目页必须带子路径；以后自有域名根路径部署时改为 /
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: SPA fallback for client routes
+        # GitHub Pages 无 rewrite：用 404.html 回退到 SPA
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

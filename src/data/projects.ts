@@ -1,5 +1,3 @@
-import { DEFAULT_COVER } from '@/config/site'
-
 export type ProjectStatus = 'active' | 'shipped' | 'wip' | 'completed'
 
 export interface Project {

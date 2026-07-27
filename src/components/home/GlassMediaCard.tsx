@@ -3,6 +3,7 @@ import type { PostMeta } from '@/lib/posts'
 import type { Project } from '@/data/projects'
 import { statusLabel } from '@/data/projects'
 import { DEFAULT_COVER, site } from '@/config/site'
+import { withBase } from '@/lib/asset'
 import { categoryLabel } from '@/components/ui/CategoryBadge'
 
 function formatCardDate(iso: string): string {
@@ -92,7 +93,7 @@ export function ProjectGlassCard({ project }: { project: Project }) {
  * panel always has something to blur; the sharp art keeps its own 16:9 band.
  */
 function CardVisual({ cover }: { cover?: string }) {
-  const src = cover || DEFAULT_COVER
+  const src = withBase(cover || DEFAULT_COVER)
   return (
     <>
       <span className="glass-card__wash" aria-hidden>

@@ -1,3 +1,5 @@
+import { withBase } from '@/lib/asset'
+
 /**
  * Cover art stretched edge to edge.
  *
@@ -10,7 +12,7 @@
 export function CoverFill({ src, className }: { src: string; className?: string }) {
   return (
     <span className={['cover-fill', className].filter(Boolean).join(' ')} aria-hidden>
-      <img src={src} alt="" loading="lazy" className="cover-fill__art" />
+      <img src={withBase(src)} alt="" loading="lazy" className="cover-fill__art" />
     </span>
   )
 }

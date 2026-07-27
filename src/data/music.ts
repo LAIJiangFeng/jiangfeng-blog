@@ -1,3 +1,5 @@
+import { withBase } from '@/lib/asset'
+
 /**
  * Personal playlist for the floating player.
  *
@@ -26,36 +28,36 @@ export const playlist: Track[] = [
     id: 'sunset-lover',
     title: 'Sunset Lover',
     artist: 'Newitt',
-    src: '/music/sunset-lover.mp3',
-    cover: '/music/covers/default.svg',
+    src: withBase('/music/sunset-lover.mp3'),
+    cover: withBase('/music/covers/default.svg'),
   },
   {
     id: 'gymnopedie-no1',
     title: 'Gymnopédie No.1',
     artist: 'Erik Satie',
-    src: '/music/gymnopedie-no1.mp3',
-    cover: '/music/covers/default.svg',
+    src: withBase('/music/gymnopedie-no1.mp3'),
+    cover: withBase('/music/covers/default.svg'),
   },
   {
     id: 'kiss-the-rain',
     title: 'Kiss the Rain (Instrumental)',
     artist: 'Yiruma',
-    src: '/music/kiss-the-rain.mp3',
-    cover: '/music/covers/default.svg',
+    src: withBase('/music/kiss-the-rain.mp3'),
+    cover: withBase('/music/covers/default.svg'),
   },
   {
     id: 'introbella',
     title: 'Introbella',
     artist: 'Introbella',
-    src: '/music/introbella.mp3',
-    cover: '/music/covers/default.svg',
+    src: withBase('/music/introbella.mp3'),
+    cover: withBase('/music/covers/default.svg'),
   },
   {
     id: 'night-owl',
     title: 'Night Owl',
     artist: 'A. Cooper',
-    src: '/music/night-owl.mp3',
-    cover: '/music/covers/default.svg',
+    src: withBase('/music/night-owl.mp3'),
+    cover: withBase('/music/covers/default.svg'),
   },
 ]
 

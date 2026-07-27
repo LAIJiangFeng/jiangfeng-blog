@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { PlayMode } from '@/data/music'
+import { withBase } from '@/lib/asset'
 import { useMusicOptional } from './MusicProvider'
 
 function formatTime(sec: number): string {
@@ -71,7 +72,7 @@ export function MusicPlayer() {
               <span className="music-modal__ring music-modal__ring--outer" />
               <span className="music-modal__ring music-modal__ring--mid" />
               <img
-                src={current.cover || '/music/covers/default.svg'}
+                src={current.cover || withBase('/music/covers/default.svg')}
                 alt=""
                 className={['music-modal__cover', playing ? 'is-spinning' : ''].join(' ')}
               />

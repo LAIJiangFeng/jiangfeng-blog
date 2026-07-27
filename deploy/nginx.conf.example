@@ -1,0 +1,62 @@
+# 自有服务器 Nginx 示例（静态 SPA + React Router）
+# 用法：复制到 /etc/nginx/sites-available/jiangfeng-blog 后改 server_name / root，再启用站点。
+#
+#   sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/jiangfeng-blog
+#   # 编辑 server_name、root、证书路径
+#   sudo ln -sf /etc/nginx/sites-available/jiangfeng-blog /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# 部署目录需与 GitHub Secret SERVER_PATH 一致（默认 /var/www/jiangfeng-blog）
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name blog.example.com;   # ← 改成你的域名
+
+    # 有 HTTPS 时建议 80 只做跳转，把下面整段 root/try_files 挪到 443 server
+    # return 301 https://$host$request_uri;
+
+    root /var/www/jiangfeng-blog;
+    index index.html;
+
+    # 静态资源长期缓存（Vite 带 hash 的文件名）
+    location /assets/ {
+        try_files $uri =404;
+        access_log off;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # SPA：任意前端路由回退到 index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 可选：压缩
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+}
+
+# HTTPS 示例（证书用 certbot 或已有 pem）
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name blog.example.com;
+#
+#     ssl_certificate     /etc/letsencrypt/live/blog.example.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/blog.example.com/privkey.pem;
+#
+#     root /var/www/jiangfeng-blog;
+#     index index.html;
+#
+#     location /assets/ {
+#         try_files $uri =404;
+#         expires 1y;
+#         add_header Cache-Control "public, immutable";
+#     }
+#
+#     location / {
+#         try_files $uri $uri/ /index.html;
+#     }
+# }

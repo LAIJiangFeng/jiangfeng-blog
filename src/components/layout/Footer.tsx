@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { site } from '@/config/site'
+import { withBase } from '@/lib/asset'
 import { navLinks } from './navLinks'
 import type { Category } from '@/lib/posts'
 import { categoryLabel } from '@/components/ui/CategoryBadge'
@@ -62,7 +63,7 @@ function buildFooterSocial(): FooterSocialItem[] {
   items.push({
     key: 'rss',
     label: 'RSS 订阅',
-    href: '/rss.xml',
+    href: withBase('/rss.xml'),
     reloadDocument: true,
     icon: <IconRss />,
   })
@@ -102,7 +103,7 @@ export function Footer() {
               to="/"
               className="logo-mark inline-flex font-[family-name:var(--font-display)] text-lg tracking-tight text-[var(--color-text)]"
             >
-              <img src="/logo.svg" alt="" className="logo-mark__img" width={28} height={28} decoding="async" />
+              <img src={withBase('/logo.svg')} alt="" className="logo-mark__img" width={28} height={28} decoding="async" />
               <span className="logo-mark__text">{site.name}</span>
             </Link>
             <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">
@@ -203,7 +204,7 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="/rss.xml" className="footer-link">
+                  <a href={withBase('/rss.xml')} className="footer-link">
                     RSS
                   </a>
                 </li>
