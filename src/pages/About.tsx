@@ -13,8 +13,13 @@ export function About() {
     <div className="about-page">
       <Seo title="关于" description={`关于 ${site.author.name}。${content.tagline}`} path="/about" />
 
-      <div className="about-shell about-breath-surface">
-        <div className="about-shell__glow" aria-hidden />
+      {/* Open layout — no card shell; ambient glow only */}
+      <div className="about-ambient" aria-hidden>
+        <span className="about-ambient__orb about-ambient__orb--a" />
+        <span className="about-ambient__orb about-ambient__orb--b" />
+      </div>
+
+      <div className="about-flow">
         <AboutHero tagline={content.tagline} badges={content.badges} story={content.story} />
         <AboutFocusCarousel title={content.now.title} items={content.now.items} />
         <AboutTimeline items={content.timeline} />
