@@ -1,8 +1,11 @@
+export type AboutTimelineIcon = 'school' | 'code' | 'layers' | 'spark'
+
 export type AboutTimelineItem = {
   year: string
   title: string
   description: string
   current?: boolean
+  icon?: AboutTimelineIcon
 }
 
 export type AboutSkillGroup = {
@@ -39,21 +42,25 @@ export const aboutContent: AboutContent = {
       year: '2018',
       title: '大学入门',
       description: 'HTML / CSS → C++ → Java → Spring',
+      icon: 'school',
     },
     {
       year: '2021',
       title: '全栈开发',
       description: 'Vue + Java，小程序与 App',
+      icon: 'code',
     },
     {
       year: '2025',
       title: '多端与 AI',
       description: 'React / Vue，开始 AI 相关开发',
+      icon: 'layers',
     },
     {
       year: '2026',
       title: '全栈 AI',
       description: 'AI 工作流 · UI · 全栈交付',
+      icon: 'spark',
       current: true,
     },
   ],

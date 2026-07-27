@@ -12,7 +12,7 @@ export function AboutHero({ tagline, badges, story }: Props) {
 
   return (
     <header className="about-top">
-      <div className="about-top__avatar about-breath" aria-hidden={!avatar}>
+      <div className="about-top__avatar" aria-hidden={!avatar}>
         <span className="about-top__ring" aria-hidden />
         {avatar ? (
           <img src={avatar} alt="" className="about-top__img" />
