@@ -1,0 +1,223 @@
+---
+title: XXL-JOB 执行器源码及原理分析
+date: 2024-12-20
+updated: 2025-11-02
+summary: 从配置、Handler 注册、Netty EmbedServer 到 run() 与回调：拆开 XXL-JOB 执行器如何接任务、跑任务、回结果。
+tags:
+  - Java
+  - XXL-JOB
+  - 源码
+  - 中间件
+category: tech
+cover: "/image/default.png"
+---
+
+XXL-JOB 可以粗分为 **调度中心** 与 **执行器**。调度中心负责任务触发与分发；执行器跑在业务服务里，接收调度、执行 `@XxlJob` 方法或脚本，再把结果回调回去。
+
+本文聚焦 **执行器侧**：配置如何落地、Handler 如何注册、Netty 嵌入式服务如何收请求，以及 `run()` 里三种 Glue 类型与阻塞策略如何工作。
+
+> 原文发布于 CSDN：[XXL-JOB执行器源码及原理分析](https://blog.csdn.net/ysfengshu/article/details/144611115)  
+> 调度中心侧可参考：[XXL-JOB 任务调度源码及原理分析（调度中心）](https://blog.csdn.net/ysfengshu/article/details/142971515)
+
+## 整体在干什么
+
+一张图里通常是两条线：
+
+- **红色**：调度中心触发任务，RPC/HTTP 调用执行器的 `run()` / `kill()` 等  
+- **绿色**：执行器启动时 `registry()` 注册自己，执行完再回调调度中心  
+
+关系可以记成：
+
+1. 一个调度中心 + 多个执行器（不同服务、不同地址）  
+2. 执行器启动时以 **Netty HTTP 服务** 形式监听端口  
+3. 启动后自动把本机地址注册到调度中心  
+4. 调度中心用 HTTP 打到执行器；执行器再跑具体业务逻辑  
+
+## 1. 执行器配置
+
+业务侧常见写法是一个 Spring `@Configuration`，把 `adminAddresses`、`accessToken`、`appname`、`port`、`logPath` 等灌进 `XxlJobSpringExecutor`：
+
+```java
+@Configuration
+public class XxlJobConfig {
+    @Value("${xxl.job.admin.addresses}")
+    private String adminAddresses;
+    @Value("${xxl.job.accessToken}")
+    private String accessToken;
+    @Value("${xxl.job.executor.appname}")
+    private String appname;
+    // address / ip / port / logPath / logRetentionDays ...
+
+    @Bean
+    public XxlJobSpringExecutor xxlJobExecutor() {
+        XxlJobSpringExecutor executor = new XxlJobSpringExecutor();
+        executor.setAdminAddresses(adminAddresses);
+        executor.setAppname(appname);
+        executor.setAccessToken(accessToken);
+        // ... 其余 setter
+        return executor;
+    }
+}
+```
+
+要点：
+
+- **adminAddresses**：调度中心地址，可多个逗号分隔  
+- **accessToken**：执行器与调度中心必须一致  
+- **appname**：执行器应用名，一般一服务一名  
+- **address / ip / port**：可空；空则自动取本机 IP，端口从 9999 起找空闲端口  
+- **logPath / logRetentionDays**：任务日志路径与保留天数  
+
+多网卡或容器场景可用 `spring-cloud-commons` 的 `InetUtils` 指定首选网段，避免注册到错误 IP。
+
+## 2. XxlJobSpringExecutor：注册 @XxlJob
+
+`XxlJobSpringExecutor` 继承 `XxlJobExecutor`，并实现 `ApplicationContextAware`、`SmartInitializingSingleton`、`DisposableBean`。
+
+单例初始化完成后（`afterSingletonsInstantiated`）做三件事：
+
+1. **`initJobHandlerMethodRepository`**：扫容器里非 `@Lazy` Bean，找出带 `@XxlJob` 的方法，注册进 `ConcurrentMap`  
+2. **`GlueFactory.refreshInstance(1)`**：脚本工厂切到 Spring 模式（可注入 `@Autowired` / `@Resource`）  
+3. **`super.start()`**：启动执行器核心（日志、回调、Netty 等）  
+
+### registJobHandler / MethodJobHandler
+
+注册时会：
+
+- 校验 handler 名称非空、不冲突  
+- `setAccessible(true)` 以便反射调用  
+- 解析注解上的 `init` / `destroy` 方法名（若有）  
+- 封装为 `MethodJobHandler(bean, executeMethod, initMethod, destroyMethod)` 放入仓库  
+
+执行时 `MethodJobHandler.execute()` 就是对目标方法的 `method.invoke(...)`；前后可分别调 `init()` / `destroy()`。
+
+仓库本身很直白：
+
+```java
+private static ConcurrentMap jobHandlerRepository = new ConcurrentHashMap();
+
+public static IJobHandler registJobHandler(String name, IJobHandler jobHandler) {
+    return jobHandlerRepository.put(name, jobHandler);
+}
+```
+
+## 3. XxlJobExecutor.start()
+
+父类 `start()` 大致顺序：
+
+1. **`XxlJobFileAppender.initLogPath(logPath)`** — 初始化任务日志目录与 `gluesource` 脚本目录  
+2. **`initAdminBizList(adminAddresses, accessToken)`** — 为每个调度中心地址建 `AdminBizClient`（后续注册、回调走 HTTP RPC）  
+3. **`JobLogFileCleanThread.start(logRetentionDays)`** — 日志清理守护线程（保留天数 **≥ 3** 才清理，按 `yyyy-MM-dd` 目录判断）  
+4. **`TriggerCallbackThread.start()`** — 执行结果回调线程 + 失败重试线程  
+5. **`initEmbedServer(...)`** — 启动嵌入式 Netty 服务并注册到调度中心  
+
+### 回调线程
+
+`TriggerCallbackThread` 从阻塞队列取 `HandleCallbackParam`，批量 `doCallback` 推回调度中心；失败会落错误日志，由重试线程周期性读取再投。
+
+### 嵌入式端口
+
+`initEmbedServer`：
+
+- 未配置 port → 从 9999 向上（再必要时向下）找空闲端口  
+- 未配置 ip → 本机 IP  
+- 未配置 address → `http://{ip}:{port}/`  
+- accessToken 为空会打安全警告  
+- `new EmbedServer().start(address, port, appname, accessToken)`  
+
+## 4. EmbedServer（重点）
+
+`start()` 里：
+
+- 创建 **`ExecutorBizImpl`** 作为业务实现  
+- 起守护线程跑 Netty：`bossGroup` + `workerGroup`  
+- 业务线程池：`0~200` 线程、队列 2000，打满直接拒绝  
+- Pipeline 典型顺序：  
+  - `IdleStateHandler`（约 90s 无读写则空闲）  
+  - `HttpServerCodec`  
+  - `HttpObjectAggregator(5MB)`  
+  - **`EmbedHttpServerHandler`**（XXL-JOB 自定义）  
+- bind 端口成功后 **`startRegistry(appname, address)`** 注册到调度中心  
+
+### EmbedHttpServerHandler
+
+`channelRead0` 收到 `FullHttpRequest` 后：
+
+1. 读 body / uri / method / access-token  
+2. 丢进 **bizThreadPool** 异步处理  
+3. `process(...)` 校验：必须 POST、uri 非空、token 匹配  
+4. 按 uri 分发：
+
+| URI | 含义 |
+| --- | --- |
+| `/beat` | 心跳 |
+| `/idleBeat` | 空闲检测 |
+| `/run` | 触发任务 |
+| `/kill` | 终止任务 |
+| `/log` | 查日志 |
+
+结果 JSON 写回，支持 keep-alive。空闲超时会关连接。
+
+## 5. ExecutorBizImpl.run()
+
+`/run` 落到 `ExecutorBizImpl.run(TriggerParam)`，核心分支是 **Glue 类型**：
+
+### BEAN
+
+- 用 `executorHandler` 名从仓库 `loadJobHandler`  
+- 若线程还在但 handler 已变 → 停旧线程  
+- 找不到 handler 直接失败  
+
+### GLUE_GROOVY
+
+- 源码变更或类型变更 → 停旧线程  
+- `GlueFactory.loadNewInstance(glueSource)` 动态加载字符串类，包一层 `GlueJobHandler`  
+
+### Script
+
+- 各类脚本模式走 `ScriptJobHandler`  
+- 同样按 glue 更新时间判断是否重建  
+
+### 阻塞策略
+
+已有 `JobThread` 在跑或队列非空时：
+
+- **DISCARD_LATER**：丢弃本次  
+- **COVER_EARLY**：杀掉旧线程，换新线程跑本次  
+- 其他策略可扩展  
+
+最后：
+
+```text
+registJobThread(jobId, handler, removeOldReason)
+  → jobThread.pushTriggerQueue(triggerParam)
+```
+
+### JobThread 怎么跑
+
+线程 `run()` 大致循环：
+
+1. `handler.init()`  
+2. 从 `triggerQueue` poll（可阻塞数秒）  
+3. 建日志文件、设 `XxlJobContext`（`InheritableThreadLocal`）  
+4. 若配置超时 → `FutureTask` + 超时 `TimeoutException`  
+5. 否则直接 `handler.execute()`（BEAN 即反射到 `@XxlJob` 方法）  
+6. `finally` 里 `TriggerCallbackThread.pushCallBack(...)` 回调度中心  
+7. 空闲超过约 30 次且队列空 → 移除线程  
+8. 停止时把队列残留任务以失败回调回去，再 `handler.destroy()`  
+
+## 读完可以记住的链路
+
+```text
+配置 Bean
+  → 扫描 @XxlJob 注册 MethodJobHandler
+  → start：日志 / AdminClient / 清理 / 回调 / Netty
+  → 注册到调度中心
+  → 调度中心 POST /run
+  → ExecutorBizImpl 选 Handler + 阻塞策略
+  → JobThread 队列执行 + 回调结果
+```
+
+细节（注册心跳周期、回调失败落盘格式、Glue 类加载器等）建议对照你使用的 XXL-JOB 版本源码再看一眼；版本不同类名与参数可能有小差异，但 **「Netty 收调度 → Handler 仓库 → JobThread 队列 → 回调」** 这条主线基本稳定。
+
+以上为个人阅读理解，如有偏差欢迎指正。

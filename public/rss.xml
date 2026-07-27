@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Jiangfeng Blog — 个人博客</title>
+    <link>https://example.com</link>
+    <description>技术笔记、生活碎片，以及一些安静的思考。</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 26 Jul 2026 18:48:52 GMT</lastBuildDate>
+    <generator>grok-blob</generator>
+    <item>
+      <title>理解大模型，用好 AI Coding</title>
+      <link>https://example.com/posts/understand-llm-ai-coding</link>
+      <guid isPermaLink="true">https://example.com/posts/understand-llm-ai-coding</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>从「预测下一个词」到上下文窗口与 Harness：搞清模型能做什么、不能做什么，Claude Code 的 Skills、Subagents 与 Hooks 才用得上。</description>
+      <category>AI</category>
+      <category>大模型</category>
+      <category>Claude Code</category>
+      <category>Skills</category>
+    </item>
+    <item>
+      <title>UI 灵感从哪来：一份可执行的资源地图</title>
+      <link>https://example.com/posts/ui-design-resources</link>
+      <guid isPermaLink="true">https://example.com/posts/ui-design-resources</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>别在后台模板和概念稿里打转。按「氛围 → 布局 → 字体 → 系统」四步走，收藏五个站点就够起步。</description>
+      <category>设计</category>
+      <category>UI</category>
+      <category>学习</category>
+      <category>手艺</category>
+    </item>
+    <item>
+      <title>Vibe Coding 真解：能生成之后，谁来负责</title>
+      <link>https://example.com/posts/vibe-coding</link>
+      <guid isPermaLink="true">https://example.com/posts/vibe-coding</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>问题不是「能不能很快做出来」，而是「做出来的东西能不能长期成立」。从概念完整性、复杂性预算到提问即设计与收放之道。</description>
+      <category>AI</category>
+      <category>Vibe Coding</category>
+      <category>工程</category>
+      <category>评审</category>
+    </item>
+    <item>
+      <title>用 Taste-Skill 驯服「AI 味」前端</title>
+      <link>https://example.com/posts/taste-skill-frontend</link>
+      <guid isPermaLink="true">https://example.com/posts/taste-skill-frontend</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>不是再堆一条「做得好看一点」，而是用可组合的技能约束：排版、密度、动效，以及完整可运行的代码。</description>
+      <category>AI</category>
+      <category>前端</category>
+      <category>设计</category>
+      <category>手艺</category>
+    </item>
+    <item>
+      <title>Java 项目 CPU 高问题定位（Linux）</title>
+      <link>https://example.com/posts/java-cpu-high-linux</link>
+      <guid isPermaLink="true">https://example.com/posts/java-cpu-high-linux</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>线上 Java 服务 CPU 飙高时，用 top → 找进程 → top -Hp → 线程 ID 转十六进制 → jstack 五步定位到具体代码。</description>
+      <category>Java</category>
+      <category>Linux</category>
+      <category>排查</category>
+      <category>JVM</category>
+    </item>
+    <item>
+      <title>从 Harness Engineering 到 Trellis 落地</title>
+      <link>https://example.com/posts/trellis-harness</link>
+      <guid isPermaLink="true">https://example.com/posts/trellis-harness</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>会话失忆、规则文件臃肿、多任务互相踩脚——Trellis 用 Spec、Task 与工作区记忆，给 AI 编程助手接上可复用的「外接大脑」。</description>
+      <category>AI</category>
+      <category>Harness</category>
+      <category>Trellis</category>
+      <category>工程</category>
+    </item>
+    <item>
+      <title>XXL-JOB 执行器源码及原理分析</title>
+      <link>https://example.com/posts/xxl-job-executor</link>
+      <guid isPermaLink="true">https://example.com/posts/xxl-job-executor</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>从配置、Handler 注册、Netty EmbedServer 到 run() 与回调：拆开 XXL-JOB 执行器如何接任务、跑任务、回结果。</description>
+      <category>Java</category>
+      <category>XXL-JOB</category>
+      <category>源码</category>
+      <category>中间件</category>
+    </item>
+  </channel>
+</rss>

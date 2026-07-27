@@ -1,0 +1,77 @@
+---
+title: Java 项目 CPU 高问题定位（Linux）
+date: 2024-11-29
+summary: 线上 Java 服务 CPU 飙高时，用 top → 找进程 → top -Hp → 线程 ID 转十六进制 → jstack 五步定位到具体代码。
+tags:
+  - Java
+  - Linux
+  - 排查
+  - JVM
+category: tech
+cover: "/image/default.png"
+---
+
+线上 Java 服务突然 CPU 飙高，最常见的诉求不是「先换机器」，而是**尽快定位到哪条线程、哪段代码在烧 CPU**。在 Linux 上可以走一套很稳的五步链路：进程 → 线程 → 十六进制 tid → `jstack` 堆栈。
+
+> 原文发布于 CSDN：[java项目CPU高问题定位(linux)](https://blog.csdn.net/ysfengshu/article/details/144132296)
+
+## 1. 查询 CPU 高的进程
+
+```bash
+top
+```
+
+在 `top` 里按 CPU 使用率排序，找到占用最高的进程，记下它的 **PID**。
+
+## 2. 确认是不是 Java 进程
+
+```bash
+ps -ef | grep java
+```
+
+把上一步的 PID 和 `ps` 结果对照一下，确认是不是你的 Java 应用（而不是别的系统进程）。
+
+## 3. 看该进程下哪个线程最忙
+
+```bash
+top -Hp <pid>
+```
+
+- `-H`：按线程展示  
+- `-p <pid>`：只看这个 Java 进程  
+
+这里可以看到具体线程的 CPU 占用，以及线程的 **TID**（线程 ID，注意它和 jstack 里的 nid 进制不同）。
+
+## 4. 把线程 TID 转成十六进制
+
+`jstack` 堆栈里的线程 nid 是十六进制，所以要把第 3 步拿到的十进制 TID 转一下：
+
+```bash
+printf "%x\n" <tid>
+```
+
+例如某次排查里得到的十六进制 `hex_tid` 为：`64e6`。
+
+## 5. 用 jstack 抓堆栈并过滤
+
+```bash
+jstack <pid> | grep -A30 "0x<hex_tid>"
+```
+
+- `<pid>`：Java 进程 PID  
+- `0x<hex_tid>`：上一步转出的十六进制线程 ID  
+- `-A30`：匹配行后再多显示 30 行，方便看到完整调用栈  
+
+堆栈里通常就能看到占用 CPU 的业务类/方法。例如某次问题最终落在 `DataListener` 相关逻辑上，就可以针对这段代码做优化或限流。
+
+## 小结
+
+| 步骤 | 命令 | 目的 |
+| --- | --- | --- |
+| 1 | `top` | 找高 CPU 进程 PID |
+| 2 | `ps -ef \| grep java` | 确认 Java 进程 |
+| 3 | `top -Hp <pid>` | 找高 CPU 线程 TID |
+| 4 | `printf "%x\n" <tid>` | TID → 十六进制 |
+| 5 | `jstack <pid> \| grep -A30 "0x..."` | 定位业务堆栈 |
+
+这套流程不依赖额外商业 APM，JDK 自带工具就能跑通。复杂场景可以再配合 Arthas、火焰图等工具做二次确认，但**第一现场先用 top + jstack 把线程钉住**，往往已经够用。

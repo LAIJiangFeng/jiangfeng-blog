@@ -1,0 +1,95 @@
+---
+title: 从 Harness Engineering 到 Trellis 落地
+date: 2026-07-24
+summary: 会话失忆、规则文件臃肿、多任务互相踩脚——Trellis 用 Spec、Task 与工作区记忆，给 AI 编程助手接上可复用的「外接大脑」。
+tags:
+  - AI
+  - Harness
+  - Trellis
+  - 工程
+category: tech
+cover: "/image/trellis.png"
+---
+
+日常用 Claude Code、Cursor 写代码时，痛点往往不在「模型不够聪明」，而在**协作环境不稳定**：
+
+1. **会话失忆（Session Death）**：上下文一满或新开对话，进度与项目背景就得重讲一遍。
+2. **规则文件失控**：所有规范塞进单个 `CLAUDE.md` / `.cursorrules`，体积膨胀后关键细节反而被忽略。
+3. **多任务并行冲突**：同一分支上同时让 AI 改多处，容易互相覆盖、Git 冲突频发。
+
+Trellis 把自己定位成 **Agent Harness**——不是再换一个更聪明的模型，而是给 AI 工具接一层统一的「外接大脑」：分层规范、任务上下文隔离、工作区持久记忆。核心理念可以概括成一句话：**教 AI 认识你的项目，只需一次**。
+
+## Harness 开源方案怎么分
+
+业界方案大致落在三条线上，侧重点不同，没有绝对优劣。
+
+### 1. 纯配置方案
+
+最轻量的起点：直接写 `CLAUDE.md` / `AGENTS.md`，再挂上 Superpowers 一类 skill 集合。核心是把**配置层 + 约束层**手动落地。
+
+**Superpowers** 更像「工程流程操作系统」：把 brainstorming、plan、TDD、review 串成约束较强的工作方式。优点是流程完整、有 worktree 隔离、小白也能 vibe 出原型；缺点是小任务也爱连环确认、上下文注入过重，长会话里细节容易在压缩后丢掉，且对项目特化习惯缺少持久记忆。
+
+### 2. 框架增强方案
+
+在配置之上增加 **spec 系统** 与 **hook 自动注入**。OpenSpec 强调「先对齐，再实现」：proposal / spec / design / tasks 结构化沉淀，每次变更独立文件夹，方便追踪归档。优点是把隐性约定写进文档；缺点是「写了 AI 是否每次都读、是否读对」仍不一定，对执行过程与任务拆解偏弱。
+
+Trellis 选择把**沉淀层系统化**：通过 session-start、inject-subagent-context、ralph loop 等 hook 时机，让 spec 在每次交互里被真正用上，而不是写完就吃灰。
+
+### 3. 多角色编排方案
+
+oh-my-claude-code 一类套件定义 planner / executor / reviewer / debugger 等角色，做多 agent 协作。适合复杂任务拆解与并行；编排层本身也更重，排查成本更高，简单任务容易「过度编排」。
+
+> Anthropic 的提醒值得常挂心上：每个 harness 组件都编码了「模型自己做不到什么」的假设；这些假设需要压力测试——它们可能本来就错，也可能随模型变强很快过时。若大量时间耗在维护 harness 本身（改计划文件、更新进度、协调 agent 通信）而代码产出很少，说明 harness 已从助力变成负担。
+
+## Trellis 三个核心概念
+
+### Spec：写给 AI 的项目规约
+
+路径通常在 `.trellis/spec/`。不是给人类看的 PRD 替代品，而是**编码标准、目录结构、错误处理、Code Review 习惯**等 Markdown 记忆。
+
+机制是**按需注入、渐进披露**：开发新功能时不会把整棵规范树塞进 prompt，而是像人开工前先回忆相关规范一样，只提取与当前任务强相关的部分。动态演进上，开发复盘后可把新实践写回 spec（Claude Code 可更自动化，其他工具常需手动触发），让 AI「越用越顺手」。
+
+### Task：有物理目录的开发容器
+
+任务落在 `.trellis/tasks/`，由 `task.json`、PRD 与相关文档组成，支持父子拆解。常见生命周期：
+
+| 状态 | 含义 |
+| --- | --- |
+| Created | 任务与子任务已建，尚未写代码 |
+| Started / In Progress | AI 投入编码与调试，可配合 worktree 与工作日志 |
+| Finished | 功能与自测结束，触发对照 Spec 的审查 |
+| Archived | 封存并移出高优先记忆区，避免污染新任务 |
+
+### Workspace：对抗会话失忆
+
+`.trellis/workspace/` 存工作日志：上次做了什么、发现了什么 bug、下一步是什么。新会话先读 journal，再续上思考链——这比「把所有历史塞进一个超长 prompt」稳得多。
+
+## 目录长什么样
+
+核心认知拆成三层，而不是一个巨型规则文件：
+
+```text
+.trellis/
+├── spec/          # 规范层：frontend / backend / guides
+├── tasks/         # 任务层：task.json + prd + jsonl 上下文清单
+└── workspace/     # 记忆与工作区：每人独立 journal
+```
+
+`implement.jsonl` / `check.jsonl` / `debug.jsonl` 用 JSON Lines 声明 Agent 应读哪些文件及原因，既控制上下文体积，也方便生成 completion markers。
+
+## 一套可执行工作流
+
+1. **初始化一次**：`trellis init -u your-name`（按平台加 `--codex` / `--opencode` 等），建立开发者身份与个人 workspace。
+2. **沉淀 Spec**：优先用 bootstrap 任务让 AI 从优质模块起草规范，再由人用 `/update-spec` 收紧架构规则；踩坑后用 `/break-loop` 把根因写回约束。
+3. **拆任务**：描述需求与相关文件，创建 Trellis 任务并补 jsonl；需求糊时先 `/brainstorm`。
+4. **按规范编码**：新会话 `/start` 注入上下文，再执行任务；写前后端前可手动 `/before-frontend-dev` 或 `/before-backend-dev`。
+5. **检查**：`/check-frontend` / `/check-backend` 对照 `.trellis/spec`。
+6. **断点与恢复**：结束前 `/finish-work` + `/record-session` 写 journal；第二天新窗口加载任务与昨日日志即可续写。
+
+多人协作时：`.trellis` 进 Git；`workspace/{name}/` 各人独立；`spec/` 与 `tasks/` 可能冲突，重要 spec 变更走 PR。
+
+## 小结
+
+从 Superpowers 的流程强化、OpenSpec 的规格沉淀，到多 agent 编排，再到 Trellis 的全链路落地——**选方案看痛点**，不必追求「最重那套」。
+
+AI Coding 范式仍在变，模型与工具都会换。不太会过时的，是从现在起积累**业务线自己的数据资产**：代码规范、架构决策、任务拆解、人机协作里沉淀的 spec。这些才是迁到任何新范式时最快的起跑线。

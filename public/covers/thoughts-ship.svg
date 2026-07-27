@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020617"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" fill="url(#g)"/>
+  <g opacity="0.4" stroke="#5EEAD4" stroke-width="1">
+    <path d="M100 100 H700 M100 160 H700 M100 220 H700 M100 280 H700 M100 340 H700"/>
+    <path d="M160 80 V400 M280 80 V400 M400 80 V400 M520 80 V400 M640 80 V400"/>
+  </g>
+  <rect x="200" y="140" width="400" height="200" rx="16" fill="#042F2E" stroke="#2DD4BF" stroke-opacity="0.5"/>
+  <text x="400" y="255" text-anchor="middle" fill="#99F6E4" font-family="ui-monospace, monospace" font-size="28" opacity="0.9">SHIP SLOWLY</text>
+</svg>

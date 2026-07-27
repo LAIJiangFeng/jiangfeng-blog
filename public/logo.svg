@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" role="img" aria-label="Jiangfeng Blob">
+  <defs>
+    <!-- Deep ink glass body -->
+    <radialGradient id="body" cx="34%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#1a2438"/>
+      <stop offset="42%" stop-color="#0e1524"/>
+      <stop offset="100%" stop-color="#05070c"/>
+    </radialGradient>
+
+    <!-- Cyan to copper rim -->
+    <linearGradient id="rim" x1="18" y1="14" x2="110" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9af0ff"/>
+      <stop offset="45%" stop-color="#6ee7ff"/>
+      <stop offset="100%" stop-color="#c4a574"/>
+    </linearGradient>
+
+    <!-- Cyan energy core -->
+    <radialGradient id="core" cx="36%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="28%" stop-color="#b8f7ff"/>
+      <stop offset="65%" stop-color="#6ee7ff"/>
+      <stop offset="100%" stop-color="#0b7ea4"/>
+    </radialGradient>
+
+    <radialGradient id="coreHalo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6ee7ff" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#6ee7ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#6ee7ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="field" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6ee7ff" stop-opacity="0.14"/>
+      <stop offset="60%" stop-color="#6ee7ff" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#6ee7ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="orbit" x1="6" y1="36" x2="122" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6ee7ff" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#6ee7ff" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#c4a574" stop-opacity="0.85"/>
+      <stop offset="80%" stop-color="#6ee7ff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#6ee7ff" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="2.4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <clipPath id="blob">
+      <path d="M64 16C86 14 108 30 112 54C116 78 100 106 72 112C44 118 16 100 14 72C12 44 36 18 64 16Z"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="64" cy="64" r="58" fill="url(#field)"/>
+
+  <!-- Rear orbit -->
+  <ellipse
+    cx="64" cy="68" rx="54" ry="17"
+    transform="rotate(-30 64 68)"
+    fill="none"
+    stroke="#6ee7ff"
+    stroke-width="1.1"
+    stroke-opacity="0.22"
+    stroke-dasharray="1.5 5"
+  />
+
+  <!-- Dark glass vessel -->
+  <path
+    d="M64 16C86 14 108 30 112 54C116 78 100 106 72 112C44 118 16 100 14 72C12 44 36 18 64 16Z"
+    fill="url(#body)"
+  />
+  <path
+    d="M64 16C86 14 108 30 112 54C116 78 100 106 72 112C44 118 16 100 14 72C12 44 36 18 64 16Z"
+    fill="none"
+    stroke="url(#rim)"
+    stroke-width="2.6"
+    filter="url(#glow)"
+  />
+
+  <!-- Inner glass sheen + constellation -->
+  <g clip-path="url(#blob)">
+    <ellipse cx="46" cy="40" rx="28" ry="12" fill="#6ee7ff" fill-opacity="0.1" transform="rotate(-18 46 40)"/>
+    <circle cx="44" cy="48" r="1.4" fill="#6ee7ff" fill-opacity="0.75"/>
+    <circle cx="84" cy="52" r="1.15" fill="#c4a574" fill-opacity="0.85"/>
+    <circle cx="54" cy="86" r="1.05" fill="#6ee7ff" fill-opacity="0.55"/>
+    <path d="M44 48L54 64L64 62" stroke="#6ee7ff" stroke-opacity="0.35" stroke-width="1"/>
+    <path d="M64 62L84 52" stroke="#6ee7ff" stroke-opacity="0.28" stroke-width="1"/>
+    <path d="M54 64L54 86" stroke="#c4a574" stroke-opacity="0.35" stroke-width="0.9"/>
+  </g>
+
+  <!-- Core -->
+  <circle cx="64" cy="62" r="22" fill="url(#coreHalo)"/>
+  <circle cx="64" cy="62" r="11" fill="url(#core)" filter="url(#glow)"/>
+  <ellipse cx="59.5" cy="57.5" rx="4" ry="2.7" fill="#fff" fill-opacity="0.55"/>
+  <circle cx="72" cy="68" r="2.1" fill="#c4a574"/>
+
+  <!-- Front orbit -->
+  <ellipse
+    cx="64" cy="68" rx="56" ry="19"
+    transform="rotate(-30 64 68)"
+    fill="none"
+    stroke="url(#orbit)"
+    stroke-width="2.3"
+    stroke-linecap="round"
+    filter="url(#glow)"
+  />
+
+  <!-- Orbit nodes -->
+  <g filter="url(#glow)">
+    <circle cx="18" cy="50" r="3" fill="#6ee7ff"/>
+    <circle cx="18" cy="50" r="1.2" fill="#e8fdff"/>
+    <circle cx="110" cy="82" r="2.5" fill="#c4a574"/>
+    <circle cx="90" cy="34" r="2" fill="#6ee7ff"/>
+    <circle cx="40" cy="98" r="1.7" fill="#6ee7ff" fill-opacity="0.85"/>
+  </g>
+</svg>

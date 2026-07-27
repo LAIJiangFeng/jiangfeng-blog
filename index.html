@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-CN" class="dark is-loading">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#07080c" />
+    <title>Jiangfeng Blog — 个人博客</title>
+    <script>
+      (function () {
+        var dark = '#07080c';
+        var light = '#f4f6fa';
+        try {
+          var t = localStorage.getItem('blog-theme');
+          var root = document.documentElement;
+          var isLight = t === 'light';
+          var surface = isLight ? light : dark;
+          root.classList.remove(isLight ? 'dark' : 'light');
+          root.classList.add(isLight ? 'light' : 'dark');
+          root.style.colorScheme = isLight ? 'light' : 'dark';
+          root.style.backgroundColor = surface;
+          document.addEventListener('DOMContentLoaded', function () {
+            if (document.body) document.body.style.backgroundColor = surface;
+          });
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.backgroundColor = dark;
+        }
+      })();
+    </script>
+    <!-- Critical splash CSS — dark = original; light = dedicated soft orb -->
+    <style>
+      html.is-loading,
+      html.is-loading body {
+        overflow: hidden !important;
+      }
+      #page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #07080c;
+        color: #e8ecf4;
+        font-family: "Outfit", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+        isolation: isolate;
+      }
+      #page-loader .pl-core {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.75rem;
+        padding: 1.5rem;
+        text-align: center;
+      }
+      /* —— Dark (original AI loader look) —— */
+      #page-loader .loader-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: min(11.5rem, 52vw);
+        height: min(11.5rem, 52vw);
+        font-family: "Outfit", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+        font-size: clamp(0.95rem, 2.6vw, 1.15rem);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: #fff;
+        border-radius: 50%;
+        user-select: none;
+      }
+      #page-loader .loader {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 50%;
+        background: transparent;
+        animation: loader-rotate 2s linear infinite;
+        z-index: 0;
+      }
+      #page-loader .loader-letter {
+        position: relative;
+        z-index: 1;
+        display: inline-block;
+        opacity: 0.4;
+        transform: translateY(0);
+        animation: loader-letter-anim 2s infinite;
+        border: none;
+        outline: none;
+        background: transparent;
+      }
+      #page-loader .loader-letter:nth-child(1) { animation-delay: 0s; }
+      #page-loader .loader-letter:nth-child(2) { animation-delay: 0.1s; }
+      #page-loader .loader-letter:nth-child(3) { animation-delay: 0.2s; }
+      #page-loader .loader-letter:nth-child(4) { animation-delay: 0.3s; }
+      #page-loader .loader-letter:nth-child(5) { animation-delay: 0.4s; }
+      #page-loader .loader-letter:nth-child(6) { animation-delay: 0.5s; }
+      #page-loader .loader-letter:nth-child(7) { animation-delay: 0.6s; }
+      #page-loader .loader-letter:nth-child(8) { animation-delay: 0.7s; }
+      #page-loader .loader-letter:nth-child(9) { animation-delay: 0.8s; }
+      #page-loader .loader-letter:nth-child(10) { animation-delay: 0.9s; }
+      @keyframes loader-rotate {
+        0% {
+          transform: rotate(90deg);
+          box-shadow:
+            0 10px 20px 0 #fff inset,
+            0 20px 30px 0 #ad5fff inset,
+            0 60px 60px 0 #471eec inset;
+        }
+        50% {
+          transform: rotate(270deg);
+          box-shadow:
+            0 10px 20px 0 #fff inset,
+            0 20px 10px 0 #d60a47 inset,
+            0 40px 60px 0 #311e80 inset;
+        }
+        100% {
+          transform: rotate(450deg);
+          box-shadow:
+            0 10px 20px 0 #fff inset,
+            0 20px 30px 0 #ad5fff inset,
+            0 60px 60px 0 #471eec inset;
+        }
+      }
+      /* Light-only — match home energy orb: coral pink / lime / peach cream */
+      @keyframes loader-rotate-light {
+        0% {
+          transform: rotate(90deg);
+          box-shadow:
+            0 10px 22px 0 #fff inset,
+            0 22px 34px 0 #ff9eb5 inset,
+            0 52px 58px 0 #b8e86a inset,
+            0 0 0 1px rgba(255, 180, 160, 0.28),
+            0 18px 42px -10px rgba(255, 160, 140, 0.28);
+        }
+        50% {
+          transform: rotate(270deg);
+          box-shadow:
+            0 10px 22px 0 #fff inset,
+            0 20px 28px 0 #ffe08a inset,
+            0 48px 56px 0 #9ad96a inset,
+            0 0 0 1px rgba(200, 230, 140, 0.3),
+            0 18px 42px -10px rgba(160, 210, 100, 0.24);
+        }
+        100% {
+          transform: rotate(450deg);
+          box-shadow:
+            0 10px 22px 0 #fff inset,
+            0 22px 34px 0 #ff9eb5 inset,
+            0 52px 58px 0 #b8e86a inset,
+            0 0 0 1px rgba(255, 180, 160, 0.28),
+            0 18px 42px -10px rgba(255, 160, 140, 0.28);
+        }
+      }
+      @keyframes loader-letter-anim {
+        0%, 100% { opacity: 0.4; transform: translateY(0); }
+        20% { opacity: 1; transform: scale(1.15); }
+        40% { opacity: 0.7; transform: translateY(0); }
+      }
+      #page-loader .pl-meter {
+        width: min(16rem, 68vw);
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        animation: pl-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+      }
+      #page-loader .pl-meter__track {
+        position: relative;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 9999px;
+        background: rgba(30, 36, 51, 0.95);
+      }
+      #page-loader .pl-meter__bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 8%;
+        border-radius: inherit;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          #ad5fff 15%,
+          #6ee7ff 55%,
+          #471eec 100%
+        );
+        box-shadow: 0 0 14px rgba(173, 95, 255, 0.55);
+        transition: width 0.12s linear;
+        animation: pl-bar-warm 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      #page-loader .pl-meter__bar.is-driven {
+        animation: none;
+      }
+      #page-loader .pl-meter__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #939aab;
+      }
+      #page-loader .pl-meter__pct {
+        color: #ad5fff;
+        font-variant-numeric: tabular-nums;
+        min-width: 2.5ch;
+        text-align: right;
+      }
+
+      /* —— Light theme only —— same palette as home energy orb —— */
+      html.light #page-loader {
+        background:
+          radial-gradient(ellipse 50% 42% at 42% 40%, rgba(255, 180, 190, 0.28) 0%, transparent 62%),
+          radial-gradient(ellipse 48% 42% at 62% 48%, rgba(190, 230, 140, 0.26) 0%, transparent 62%),
+          radial-gradient(ellipse 40% 36% at 50% 62%, rgba(255, 230, 160, 0.18) 0%, transparent 58%),
+          #f4f6fa;
+        color: #12151c;
+      }
+      html.light #page-loader .loader-wrapper {
+        color: #12151c;
+        filter: drop-shadow(0 14px 32px rgba(180, 160, 140, 0.18));
+      }
+      /* Soft multi-hue core: coral → cream → lime (hero orb feel) */
+      html.light #page-loader .loader-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        z-index: 0;
+        background:
+          radial-gradient(circle at 28% 32%, rgba(255, 200, 205, 0.85) 0%, transparent 42%),
+          radial-gradient(circle at 72% 48%, rgba(200, 235, 150, 0.8) 0%, transparent 46%),
+          radial-gradient(circle at 50% 78%, rgba(255, 230, 170, 0.7) 0%, transparent 48%),
+          radial-gradient(circle at 48% 45%, #ffffff 0%, #faf8f4 55%, #f0eee8 100%);
+        box-shadow:
+          0 0 0 1px rgba(255, 200, 190, 0.35),
+          0 16px 40px -12px rgba(200, 180, 160, 0.28);
+      }
+      html.light #page-loader .loader {
+        animation-name: loader-rotate-light;
+      }
+      html.light #page-loader .loader-letter {
+        opacity: 0.55;
+        text-shadow: none;
+        color: #12151c;
+        font-weight: 500;
+      }
+      html.light #page-loader .pl-meter__track {
+        background: #e2e8f0;
+      }
+      html.light #page-loader .pl-meter__bar {
+        background: linear-gradient(
+          90deg,
+          #ff9eb5 0%,
+          #ffd27a 45%,
+          #9ad96a 100%
+        );
+        box-shadow: 0 0 12px rgba(255, 180, 150, 0.4);
+      }
+      html.light #page-loader .pl-meter__row {
+        color: #94a3b8;
+      }
+      html.light #page-loader .pl-meter__pct {
+        color: #0b7ea4;
+      }
+
+      #page-loader.page-loader--exit {
+        pointer-events: none;
+        animation: pl-exit 0.72s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+      }
+      #page-loader.page-loader--exit .pl-core {
+        animation: pl-exit-core 0.55s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+      }
+      @keyframes pl-rise {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes pl-bar-warm {
+        from { width: 0%; }
+        to { width: 18%; }
+      }
+      @keyframes pl-exit {
+        0% { opacity: 1; filter: blur(0); }
+        55% { opacity: 1; }
+        100% { opacity: 0; filter: blur(12px); visibility: hidden; }
+      }
+      @keyframes pl-exit-core {
+        to { opacity: 0; transform: scale(1.06) translateY(-12px); filter: blur(6px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #page-loader .loader,
+        #page-loader .loader-letter,
+        #page-loader .pl-meter {
+          animation: none !important;
+        }
+        #page-loader .loader {
+          box-shadow:
+            0 10px 20px 0 #fff inset,
+            0 20px 30px 0 #ad5fff inset,
+            0 60px 60px 0 #471eec inset;
+        }
+        html.light #page-loader .loader {
+          box-shadow:
+            0 10px 22px 0 #fff inset,
+            0 22px 34px 0 #ff9eb5 inset,
+            0 52px 58px 0 #b8e86a inset,
+            0 0 0 1px rgba(255, 180, 160, 0.28),
+            0 18px 42px -10px rgba(255, 160, 140, 0.28);
+        }
+        #page-loader .loader-letter {
+          opacity: 0.85;
+        }
+        #page-loader.page-loader--exit {
+          animation: pl-exit 0.25s linear forwards;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="is-loading">
+    <!-- Instant full-screen splash (AI loader + progress; removed by PageLoader) -->
+    <div
+      id="page-loader"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="页面加载中"
+    >
+      <div class="pl-core">
+        <div class="loader-wrapper" aria-hidden="true">
+          <span class="loader-letter">G</span>
+          <span class="loader-letter">e</span>
+          <span class="loader-letter">n</span>
+          <span class="loader-letter">e</span>
+          <span class="loader-letter">r</span>
+          <span class="loader-letter">a</span>
+          <span class="loader-letter">t</span>
+          <span class="loader-letter">i</span>
+          <span class="loader-letter">n</span>
+          <span class="loader-letter">g</span>
+          <div class="loader"></div>
+        </div>
+        <div class="pl-meter">
+          <div class="pl-meter__track">
+            <div class="pl-meter__bar" data-loader-bar></div>
+          </div>
+          <div class="pl-meter__row">
+            <span>system</span>
+            <span><span class="pl-meter__pct" data-loader-progress>00</span>%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
