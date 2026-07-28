@@ -36,7 +36,14 @@ export function PageLoader() {
     let raf = 0
     let finished = false
     let exitTimer = 0
-    let appReady = document.readyState === 'complete'
+    /*
+      Do NOT wait for window `load` (all images/fonts). On mobile the home
+      covers can take seconds; blocking the full-screen splash until then
+      makes the header menu feel dead. React mount + interactive DOM is enough;
+      SoftImage skeletons cover remaining media.
+    */
+    let appReady =
+      document.readyState === 'interactive' || document.readyState === 'complete'
 
     if (barEl) barEl.classList.add('is-driven')
 
@@ -51,8 +58,10 @@ export function PageLoader() {
     }
 
     if (!appReady) {
-      window.addEventListener('load', markReady, { once: true })
+      document.addEventListener('DOMContentLoaded', markReady, { once: true })
     }
+    // This component only mounts after React hydrates — mark ready on next frame
+    const readyRaf = window.requestAnimationFrame(markReady)
 
     const finish = () => {
       if (finished) return
@@ -62,11 +71,13 @@ export function PageLoader() {
       root.dataset.dismissed = '1'
       root.classList.add('page-loader--exit')
       root.setAttribute('aria-busy', 'false')
+      // Allow interaction immediately on exit start (overlay is fading out)
+      root.style.pointerEvents = 'none'
+      document.documentElement.classList.remove('is-loading')
+      document.body.classList.remove('is-loading')
 
       exitTimer = window.setTimeout(() => {
         root.remove()
-        document.documentElement.classList.remove('is-loading')
-        document.body.classList.remove('is-loading')
         setGone(true)
       }, exitMs)
     }
@@ -94,14 +105,15 @@ export function PageLoader() {
     document.body.classList.add('is-loading')
     raf = requestAnimationFrame(tick)
 
-    // Failsafe: never trap the user if load hangs
-    const failsafe = window.setTimeout(finish, 6000)
+    // Failsafe: never trap the user if something hangs
+    const failsafe = window.setTimeout(finish, 3500)
 
     return () => {
       cancelAnimationFrame(raf)
+      cancelAnimationFrame(readyRaf)
       window.clearTimeout(failsafe)
       window.clearTimeout(exitTimer)
-      window.removeEventListener('load', markReady)
+      document.removeEventListener('DOMContentLoaded', markReady)
     }
   }, [])
 

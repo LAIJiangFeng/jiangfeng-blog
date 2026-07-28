@@ -270,7 +270,8 @@
       }
 
       #page-loader.page-loader--exit {
-        pointer-events: none;
+        /* Unblock header/menu as soon as exit starts — don't wait for fade */
+        pointer-events: none !important;
         animation: pl-exit 0.72s cubic-bezier(0.65, 0, 0.35, 1) forwards;
       }
       #page-loader.page-loader--exit .pl-core {

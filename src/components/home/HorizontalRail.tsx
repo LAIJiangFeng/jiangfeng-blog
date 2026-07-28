@@ -14,7 +14,7 @@ export function HorizontalRail({
   children,
   itemCount,
   label,
-  /** How many full cards fit in one view (desktop). */
+  /** How many full cards fit in one view (desktop). CSS may override on smaller breakpoints. */
   perView = 3,
 }: {
   children: ReactNode
@@ -51,6 +51,78 @@ export function HorizontalRail({
     }
   }, [])
 
+  const getItems = useCallback((): HTMLElement[] => {
+    const el = scrollerRef.current
+    if (!el) return []
+    return Array.from(el.querySelectorAll<HTMLElement>('[data-rail-item]'))
+  }, [])
+
+  /** CSS --rail-per-view is authoritative; prop is only a desktop fallback. */
+  const measurePerView = useCallback((): number => {
+    const el = scrollerRef.current
+    if (!el) return Math.max(1, perView)
+    const raw = getComputedStyle(el).getPropertyValue('--rail-per-view').trim()
+    const fromCss = Number.parseFloat(raw)
+    if (Number.isFinite(fromCss) && fromCss > 0) return Math.max(1, Math.round(fromCss))
+
+    const items = getItems()
+    if (items.length === 0) return Math.max(1, perView)
+    const first = items[0]
+    const w = first.offsetWidth
+    if (w <= 0) return Math.max(1, perView)
+    // Derive gap from second item when present
+    let gap = 0
+    if (items.length > 1) {
+      gap = Math.max(0, items[1].offsetLeft - first.offsetLeft - w)
+    }
+    return Math.max(1, Math.round(el.clientWidth / (w + gap)))
+  }, [getItems, perView])
+
+  /** Max scrollLeft that still shows a full “page” of cards (no trailing blank). */
+  const maxStartLeft = useCallback((): number => {
+    const el = scrollerRef.current
+    if (!el) return 0
+    return Math.max(0, el.scrollWidth - el.clientWidth)
+  }, [])
+
+  const nearestIndex = useCallback((): number => {
+    const el = scrollerRef.current
+    const items = getItems()
+    if (!el || items.length === 0) return 0
+
+    const left = el.scrollLeft
+    let best = 0
+    let bestDist = Infinity
+    for (let i = 0; i < items.length; i++) {
+      const dist = Math.abs(items[i].offsetLeft - left)
+      if (dist < bestDist) {
+        bestDist = dist
+        best = i
+      }
+    }
+    return best
+  }, [getItems])
+
+  const scrollToItem = useCallback(
+    (index: number, behavior?: ScrollBehavior) => {
+      const el = scrollerRef.current
+      const items = getItems()
+      if (!el || items.length === 0) return
+
+      const visible = measurePerView()
+      // Last valid start index so the final page is still full of cards
+      const maxIdx = Math.max(0, items.length - visible)
+      const clamped = Math.max(0, Math.min(maxIdx, index))
+      const targetLeft = Math.min(items[clamped].offsetLeft, maxStartLeft())
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      el.scrollTo({
+        left: targetLeft,
+        behavior: behavior ?? (reduce ? 'auto' : 'smooth'),
+      })
+    },
+    [getItems, maxStartLeft, measurePerView],
+  )
+
   const sync = useCallback(() => {
     const el = scrollerRef.current
     if (!el || itemCount === 0) {
@@ -62,7 +134,7 @@ export function HorizontalRail({
       return
     }
 
-    const max = Math.max(0, el.scrollWidth - el.clientWidth)
+    const max = maxStartLeft()
     const scrollable = max > EDGE
     setCanScroll(scrollable)
 
@@ -71,17 +143,20 @@ export function HorizontalRail({
     setAtStart(start)
     setAtEnd(end)
 
-    // pages: each page advances by roughly one viewport
-    const pages = !scrollable ? 1 : Math.max(1, Math.ceil(itemCount / perView))
+    const visible = measurePerView()
+    const pages = !scrollable ? 1 : Math.max(1, Math.ceil(itemCount / visible))
     setPageCount(pages)
 
     if (!scrollable) {
       setPage(0)
       return
     }
-    const ratio = el.scrollLeft / max
-    setPage(Math.min(pages - 1, Math.round(ratio * (pages - 1))))
-  }, [itemCount, perView])
+
+    // Page from nearest item index (stable vs ratio math that drifts into blank)
+    const idx = nearestIndex()
+    const pageFromIdx = Math.min(pages - 1, Math.floor(idx / visible))
+    setPage(pageFromIdx)
+  }, [itemCount, maxStartLeft, measurePerView, nearestIndex])
 
   /**
    * Desktop: start mid-rail so prev/next both work.
@@ -91,13 +166,21 @@ export function HorizontalRail({
   const centerInitial = useCallback(() => {
     const el = scrollerRef.current
     if (!el || itemCount === 0) return
-    const max = Math.max(0, el.scrollWidth - el.clientWidth)
+    const max = maxStartLeft()
     const mobile = window.matchMedia('(max-width: 639px)').matches
     if (max > EDGE && !mobile) {
-      el.scrollLeft = max / 2
+      const items = getItems()
+      const visible = measurePerView()
+      const maxIdx = Math.max(0, items.length - visible)
+      const mid = Math.floor(maxIdx / 2)
+      if (items[mid]) {
+        el.scrollLeft = Math.min(items[mid].offsetLeft, max)
+      } else {
+        el.scrollLeft = max / 2
+      }
     }
     sync()
-  }, [itemCount, sync])
+  }, [getItems, itemCount, maxStartLeft, measurePerView, sync])
 
   useEffect(() => {
     centeredOnceRef.current = false
@@ -112,17 +195,25 @@ export function HorizontalRail({
         centerInitial()
         centeredOnceRef.current = true
       } else {
+        // Images/fonts can grow scrollWidth after first paint — clamp out of blank zone
+        const max = maxStartLeft()
+        if (el.scrollLeft > max) {
+          el.scrollLeft = max
+        }
         sync()
       }
     }
 
     run()
     const ro = new ResizeObserver(() => {
-      // Re-center only if we still haven't locked, else just sync edges
       if (!centeredOnceRef.current) {
         centerInitial()
         centeredOnceRef.current = true
       } else {
+        const max = maxStartLeft()
+        if (el.scrollLeft > max) {
+          el.scrollLeft = max
+        }
         sync()
       }
     })
@@ -130,12 +221,14 @@ export function HorizontalRail({
     window.addEventListener('resize', sync)
     // fonts / images may change scrollWidth after first paint
     const t = window.setTimeout(run, 50)
+    const t2 = window.setTimeout(run, 300)
     return () => {
       ro.disconnect()
       window.removeEventListener('resize', sync)
       window.clearTimeout(t)
+      window.clearTimeout(t2)
     }
-  }, [centerInitial, sync, children])
+  }, [centerInitial, maxStartLeft, sync, children])
 
   function onScroll(_e: UIEvent<HTMLDivElement>) {
     sync()
@@ -145,7 +238,6 @@ export function HorizontalRail({
     const el = scrollerRef.current
     if (!el) return
 
-    // At edges: keep capturing the click so it never falls through to the card link.
     if (dir < 0 && atStart) {
       showEdgeHint('没有更多了')
       return
@@ -155,17 +247,16 @@ export function HorizontalRail({
       return
     }
 
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    el.scrollBy({ left: dir * el.clientWidth, behavior: reduce ? 'auto' : 'smooth' })
+    const visible = measurePerView()
+    const idx = nearestIndex()
+    const next = idx + dir * visible
+    scrollToItem(next)
   }
 
   function goToPage(index: number) {
-    const el = scrollerRef.current
-    if (!el || pageCount <= 1) return
-    const max = el.scrollWidth - el.clientWidth
-    const target = pageCount <= 1 ? 0 : (index / (pageCount - 1)) * max
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    el.scrollTo({ left: target, behavior: reduce ? 'auto' : 'smooth' })
+    if (pageCount <= 1) return
+    const visible = measurePerView()
+    scrollToItem(index * visible)
   }
 
   if (itemCount === 0) return null

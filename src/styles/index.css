@@ -793,14 +793,23 @@ html.home-route {
 /*
   Home hit-testing: shell chrome paints above the fixed orb (z-0) so scroll
   content covers the ball — but the chrome wrapper must not steal clicks in
-  the hero band. Pass events through; re-enable on real UI chrome + feed.
+  the hero band (CTA links live on the body-portaled orb). Pass events through
+  .site-chrome; re-enable on real UI chrome + feed.
+
+  Explicit pe:auto on header controls (not only the header box) avoids WebKit
+  cases where a pe:none ancestor + sticky bar left the menu dead until a later
+  reflow (e.g. cover images finishing load).
 */
 html.home-route .site-chrome {
   pointer-events: none;
 }
 
 html.home-route .site-header,
+html.home-route .site-header a,
+html.home-route .site-header button,
+html.home-route .site-header nav,
 html.home-route .site-footer,
+html.home-route .site-footer a,
 html.home-route .home-content-layer {
   pointer-events: auto;
 }
@@ -2605,8 +2614,10 @@ html.light .marquee-bar {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  /* Match snap origin to item edges (side padding used to bias half-card stops) */
+  scroll-padding-inline: 0;
   /* vertical room for translateY hover (scale is avoided — it gets clipped) */
-  padding: 0.65rem 0.15rem 0.9rem;
+  padding: 0.65rem 0 0.9rem;
   margin: -0.35rem 0;
 }
 
@@ -2616,6 +2627,7 @@ html.light .marquee-bar {
 
 .h-rail__item {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   min-width: 0;
   /* grid stretch gives every item the tallest row height; flex passes it down
      to the card so nameplates line up even with uneven summary lengths */

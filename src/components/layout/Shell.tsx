@@ -28,7 +28,7 @@ export function Shell() {
         z-10 keeps chrome above the body-portaled home orb (z-0).
         Transparent so the frosted home sheet can blur the energy ball.
         Home: site-chrome is pointer-events:none so hero CTAs under it still click
-        (header / footer / feed re-enable hits via CSS).
+        (header / footer / feed re-enable hits via CSS, including header controls).
       */}
       <div className="site-chrome relative z-10 flex min-h-screen flex-col bg-transparent">
         <Header variant={isHome ? 'overlay' : 'default'} />
