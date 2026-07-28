@@ -97,13 +97,14 @@ function CardVisual({ cover }: { cover?: string }) {
   return (
     <>
       <span className="glass-card__wash" aria-hidden>
+        {/* Blur wash can crop; only the sharp band must show the full stretched art */}
         <SoftImage src={src} alt="" fit="cover" skeleton={false} className="glass-card__wash-img" />
       </span>
       <span className="glass-card__visual" aria-hidden>
         <SoftImage
           src={src}
           alt=""
-          fit="cover"
+          fit="fill"
           className="glass-card__visual-img"
           imgClassName="glass-card__img"
         />

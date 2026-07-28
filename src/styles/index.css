@@ -1318,8 +1318,11 @@ html.light .soft-image__skeleton {
 }
 
 .soft-image__img--fill {
-  object-fit: fill;
+  object-fit: fill !important;
   object-position: center;
+  /* Kill intrinsic max sizing that can leave gutters on iOS */
+  max-width: none;
+  max-height: none;
 }
 
 .soft-image__img--contain {
@@ -1338,8 +1341,8 @@ html.light .soft-image__skeleton {
 }
 
 /* ---------- Cover fill ----------
-   Covers ship at mixed ratios; card frames are fixed (often 16:9 / 16:10).
-   Shared by every card that shows a cover. SoftImage provides the skeleton. */
+   Card frame size is fixed; image STRETCHES into it (object-fit: fill).
+   Distortion OK — full artwork visible, no left/right crop. SoftImage = skeleton. */
 .cover-fill {
   position: absolute;
   inset: 0;
@@ -1355,14 +1358,14 @@ html.light .soft-image__skeleton {
 .cover-fill .soft-image__img {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   /*
-    `cover` fills the frame on every browser (incl. iOS Safari) without the
-    right-side letterbox that `fill` sometimes left on mixed-ratio assets.
-    Slight crop on non-16:9 sources is preferable to empty gutters.
+    fill = stretch to the box edges. Prefer full image over preserving ratio.
   */
-  object-fit: cover;
+  object-fit: fill !important;
   object-position: center center;
   transition: transform 0.5s ease, opacity 0.35s ease;
 }
@@ -1394,14 +1397,23 @@ html.light .soft-image__skeleton {
   position: relative;
   width: 100%;
   max-width: 100%;
+  /* Fixed height (not aspect-ratio+max-height) so width stays 100% on iOS */
+  height: 10.5rem;
   overflow: hidden;
-  /*
-    Only aspect-ratio — do NOT pair with max-height. On iOS Safari that combo
-    shrinks the used width to keep the ratio, leaving an empty gutter on the right.
-  */
-  aspect-ratio: 16 / 10;
   background: var(--color-bg);
   flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .post-browse-card__media {
+    height: 11.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .post-browse-card__media {
+    height: 11.75rem;
+  }
 }
 
 .post-browse-card__media-link {
@@ -2847,25 +2859,44 @@ html.light .glass-card__wash .soft-image__img {
   z-index: 1;
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  /* Compact fixed band — image stretches (fill) into this box */
+  height: 11.5rem;
+  aspect-ratio: auto;
   flex: 0 0 auto;
   overflow: hidden;
   background: var(--color-bg);
+}
+
+@media (min-width: 640px) {
+  .glass-card__visual {
+    height: 12.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .glass-card__visual {
+    height: 12.75rem;
+  }
 }
 
 .glass-card__visual-img,
 .glass-card__visual .soft-image {
   position: absolute;
   inset: 0;
-  width: auto;
-  height: auto;
+  width: auto !important;
+  height: auto !important;
 }
 
 .glass-card__img,
 .glass-card__visual .soft-image__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  /* Stretch full art into the band — crop was cutting left/right on iPhone */
+  object-fit: fill !important;
   object-position: center center;
   transition: transform 0.55s ease, opacity 0.35s ease;
 }
@@ -3283,9 +3314,10 @@ html.light .glass-card__shade {
 }
 
 .related-posts .post-browse-card__media {
-  aspect-ratio: 16 / 10;
-  max-height: none;
+  /* Fixed height so fill-stretch works; no aspect-ratio width shrink on iOS */
+  height: 11rem;
   width: 100%;
+  aspect-ratio: auto;
 }
 
 .related-posts .post-browse-card__body {

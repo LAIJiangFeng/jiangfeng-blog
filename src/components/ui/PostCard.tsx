@@ -24,7 +24,7 @@ export function PostCard({
     <article className="post-card-grid group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
       <Link
         to={`/posts/${post.slug}`}
-        className="post-card-cover relative block aspect-[16/9] w-full overflow-hidden"
+        className="post-card-cover relative block h-[10.5rem] w-full overflow-hidden sm:h-[11.5rem]"
         aria-label={`阅读：${post.title}`}
       >
         <CoverFill src={cover} />

@@ -5,7 +5,10 @@ type Fit = 'cover' | 'fill' | 'contain'
 
 export type SoftImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
   src: string
-  /** Visual fit inside the frame. Default cover (fills width/height, may crop). */
+  /**
+   * Visual fit inside the frame.
+   * Default `fill` = stretch to box (may distort; never crops).
+   */
   fit?: Fit
   /** Wrapper class (positioned box). */
   className?: string
@@ -22,7 +25,7 @@ export type SoftImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & 
 export function SoftImage({
   src,
   alt = '',
-  fit = 'cover',
+  fit = 'fill',
   className,
   imgClassName,
   skeleton = true,
