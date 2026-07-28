@@ -229,6 +229,28 @@ body {
   /* Do NOT transition background/color — mid values look gray during theme switch */
 }
 
+/*
+  iOS Safari auto-zooms the viewport when a focused <input> is under 16px.
+  That leaves horizontal scrollbars and forces users to pinch-out after search.
+  Keep form controls at ≥16px on touch devices (desktop can stay slightly tighter).
+*/
+.search-field,
+.search-popover__input,
+input[type='search'],
+input[type='text'],
+input[type='email'],
+input[type='url'],
+input[type='tel'],
+textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 768px) {
+  .search-field {
+    font-size: 0.9375rem; /* 15px — desktop only; no iOS focus-zoom */
+  }
+}
+
 /* Shared heading rhythm */
 h1,
 h2,

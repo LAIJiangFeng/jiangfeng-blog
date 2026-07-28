@@ -65,7 +65,8 @@ export function SearchInput({
         onChange={handleChange}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
-        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-4 py-2.5 font-[family-name:var(--font-mono)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] outline-none transition-all focus:border-[var(--color-accent)] focus:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent)_35%,transparent),0_0_24px_-8px_var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/40"
+        /* text-base (16px): iOS Safari zooms the page when focused inputs are < 16px */
+        className="search-field w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-4 py-2.5 font-[family-name:var(--font-mono)] text-base text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] outline-none transition-all focus:border-[var(--color-accent)] focus:shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-accent)_35%,transparent),0_0_24px_-8px_var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/40"
       />
     </label>
   )
