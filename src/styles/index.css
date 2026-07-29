@@ -7118,8 +7118,8 @@ html.light .friend-marquee__fade--right {
   position: relative;
   display: block;
   width: var(--archive-thumb);
-  aspect-ratio: 16 / 10;
-  align-self: start;
+  aspect-ratio: auto;
+  align-self: stretch;
   overflow: hidden;
   border-radius: 0.65rem;
   background: var(--color-bg);
@@ -7133,9 +7133,9 @@ html.light .friend-marquee__fade--right {
   height: 100%;
 }
 
-/* 归档缩略图完整展示封面，避免不同尺寸图片被拉伸或裁切。 */
+/* 归档缩略图随卡片高度撑满，避免出现上下留白。 */
 .archive-item__thumb .cover-fill__art {
-  object-fit: contain !important;
+  object-fit: fill !important;
 }
 
 .archive-item__main {
