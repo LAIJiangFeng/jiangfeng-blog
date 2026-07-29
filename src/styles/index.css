@@ -7132,6 +7132,11 @@ html.light .friend-marquee__fade--right {
   height: 100%;
 }
 
+/* 归档缩略图保持封面比例，避免共享填充规则把图片拉伸变形。 */
+.archive-item__thumb .cover-fill__art {
+  object-fit: cover !important;
+}
+
 .archive-item__main {
   display: flex;
   min-width: 0;
